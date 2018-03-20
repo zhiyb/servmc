@@ -1,11 +1,14 @@
-SRC	= main.c exec.c cmd.c net.c
+SRC	= main.c exec.c cmd.c net.c update.c
 TRG	= servmc
 
 OBJ	= $(SRC:.c=.o)
-LIBS	= $(shell curl-config --libs) -lreadline -lpthread
-
-CFLAGS	= -Wall -Werror -O2 $(shell curl-config --cflags)
+CFLAGS	:= -Wall -Werror -O2
+CFLAGS	+= $(shell curl-config --cflags)
+CFLAGS	+= $(shell pkg-config --cflags json-c)
 LDFLAGS	= -Wall -Werror -O2
+LIBS	:= $(shell curl-config --libs)
+LIBS	+= $(shell pkg-config --libs json-c)
+LIBS	+= -lreadline -lpthread
 
 .PHONY: all
 all: $(TRG)

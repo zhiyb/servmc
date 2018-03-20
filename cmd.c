@@ -6,6 +6,7 @@
 #include <readline/history.h>
 #include "exec.h"
 #include "net.h"
+#include "update.h"
 #include "cmd.h"
 
 static void cmd_line(char *line)
@@ -34,12 +35,8 @@ static void cmd_line(char *line)
 		if (err)
 			fprintf(stderr, "%s: Error starting: %s\n",
 					__func__, strerror(err));
-	} else if (strcmp(cmd, "!get") == 0) {
-		const char *url = strtok(NULL, delim);
-		size_t size;
-		char *p = net_get(url, &size);
-		fwrite(p, size, 1, stderr);
-		free(p);
+	} else if (strcmp(cmd, "!mf") == 0) {
+		update();
 	} else {
 		fprintf(stderr, "%s: Unknown command: %s\n",
 				__func__, line);
