@@ -10,14 +10,21 @@
 #define READ	0
 #define WRITE	1
 
-static pid_t pid;
+static pid_t pid = -1;
 static int fdin[2], fdout[2], fderr[2];
 static FILE *fin, *fout, *ferr;
 
 pthread_mutex_t mtxin, mtxout, mtxerr;
 
+int exec_status()
+{
+	return pid;
+}
+
 void exec_write_stdin(const char *str)
 {
+	if (pid < 0)
+		return;
 	pthread_mutex_lock(&mtxin);
 	fputs(str, fin);
 	fputc('\n', fin);
@@ -25,18 +32,20 @@ void exec_write_stdin(const char *str)
 	pthread_mutex_unlock(&mtxin);
 }
 
-int exec_stdout_rfd()
+int exec_rfd(int err)
 {
-	return fileno(fout);
+	if (pid < 0)
+		return -1;
+	return fileno(err ? ferr : fout);
 }
 
-static char *exec_read_stdout()
+static char *exec_read(int err)
 {
 	char *s = NULL;
 	unsigned int len = 0;
 	do {
 		char buf[256];
-		if (!fgets(buf, sizeof(buf), fout))
+		if (!fgets(buf, sizeof(buf), err ? ferr : fout))
 			return s;
 		unsigned int slen = strlen(buf);
 		s = realloc(s, len + slen + 1);
@@ -46,9 +55,9 @@ static char *exec_read_stdout()
 	return s;
 }
 
-int exec_stdout_process()
+int exec_process(int err)
 {
-	char *s = exec_read_stdout();
+	char *s = exec_read(err);
 	if (!s)
 		return EOF;
 	fputs(s, stdout);
@@ -58,6 +67,9 @@ int exec_stdout_process()
 
 int exec_server(const char *jar)
 {
+	if (pid >= 0)
+		return EBUSY;
+	fprintf(stderr, "%s: Process start: %s\n", __func__, jar);
 	// Create input/output pipes
 	pipe(fdin);
 	pipe(fdout);
@@ -82,7 +94,7 @@ int exec_server(const char *jar)
 		setlinebuf(fin);
 		setbuf(fout, NULL);
 		setbuf(ferr, NULL);
-		return -EAGAIN;
+		return 0;
 	}
 
 	// Child process
@@ -92,13 +104,18 @@ int exec_server(const char *jar)
 	dup2(fderr[WRITE], STDERR_FILENO);
 
 	// Execute
-	execlp("bash", "bash", (char *)NULL);
+	//execlp("bash", "bash", (char *)NULL);
+	execlp("java", "java", "-jar", jar, "nogui", (char *)NULL);
 	return 0;
 }
 
 void exec_quit()
 {
+	if (pid < 0)
+		return;
+	fprintf(stderr, "%s: Process quit\n", __func__);
 	wait(NULL);
+	pid = -1;
 	fclose(fin);
 	close(fdin[READ]);
 	fclose(fout);

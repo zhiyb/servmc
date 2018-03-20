@@ -13,32 +13,38 @@
 
 int main(int argc, char *argv[])
 {
-	int ret = exec_server(NULL);
-	if (ret != -EAGAIN)
-		return ret;
-
+	fd_set rfds;
 	cmd_init();
 
-	// Setup file descriptors
-	fd_set rfds, arfds;
-	FD_ZERO(&arfds);
-	FD_SET(cmd_rfd(), &arfds);
-	FD_SET(exec_stdout_rfd(), &arfds);
+loop:	// Setup file descriptors
+	FD_ZERO(&rfds);
+	FD_SET(cmd_rfd(), &rfds);
+	int nfds = cmd_rfd();
+	int fdout = exec_rfd(0), fderr = exec_rfd(1);
+	if (fdout >= 0)
+		FD_SET(fdout, &rfds);
+	nfds = nfds >= fdout ? nfds : fdout;
+	if (fderr >= 0)
+		FD_SET(fderr, &rfds);
+	nfds = nfds >= fderr ? nfds : fderr;
 
-loop:	// Wait for reading data
-	memcpy(&rfds, &arfds, sizeof(arfds));
-	ret = select(exec_stdout_rfd() + 1, &rfds, NULL, NULL, NULL);
+	// Wait for reading data
+	int ret = select(nfds + 1, &rfds, NULL, NULL, NULL);
 	if (ret < 0)
-		;
+		goto quit;
 	else if (ret == 0)
 		goto loop;
-	if (FD_ISSET(cmd_rfd(), &rfds)) {
+	if (FD_ISSET(cmd_rfd(), &rfds))
 		cmd_process();
-	}
-	if (FD_ISSET(exec_stdout_rfd(), &rfds)) {
-		if (exec_stdout_process() == EOF)
-			goto quit;
-	}
+	int quit = 0;
+	if (FD_ISSET(fdout, &rfds))
+		if (exec_process(0) == EOF)
+			quit = 1;
+	if (FD_ISSET(fderr, &rfds))
+		if (exec_process(1) == EOF)
+			quit = 1;
+	if (quit)
+		exec_quit();
 	goto loop;
 
 quit:

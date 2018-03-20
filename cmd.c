@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <errno.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "exec.h"
@@ -8,8 +9,39 @@
 
 static void cmd_line(char *line)
 {
+	static const char *delim = " \n";
 	add_history(line);
-	exec_write_stdin(line);
+
+	// Send strings to server process
+	if (*line != '!') {
+		if (exec_status() < 0)
+			fprintf(stderr, "%s: JAR is not running\n",
+					__func__);
+		else
+			exec_write_stdin(line);
+		goto ret;
+	}
+
+	// Process special commands
+	char *cmd = strtok(line, delim);
+	if (strcmp(cmd, "!exec") == 0) {
+		printf("%s:%u exec\n", __func__, __LINE__);
+	} else if (strcmp(cmd, "!jar") == 0) {
+		if (exec_status() >= 0) {
+			fprintf(stderr, "%s: Another JAR is running\n",
+					__func__);
+		} else {
+			int err = exec_server(strtok(NULL, delim));
+			if (err)
+				fprintf(stderr, "%s: Error starting: %s\n",
+						__func__, strerror(err));
+		}
+	} else {
+		fprintf(stderr, "%s: Unknown command: %s\n",
+				__func__, line);
+	}
+
+ret:
 	free(line);
 }
 
