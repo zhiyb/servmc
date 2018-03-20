@@ -5,6 +5,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "exec.h"
+#include "net.h"
 #include "cmd.h"
 
 static void cmd_line(char *line)
@@ -27,15 +28,18 @@ static void cmd_line(char *line)
 	if (strcmp(cmd, "!exec") == 0) {
 		printf("%s:%u exec\n", __func__, __LINE__);
 	} else if (strcmp(cmd, "!jar") == 0) {
-		if (exec_status() >= 0) {
-			fprintf(stderr, "%s: Another JAR is running\n",
-					__func__);
-		} else {
-			int err = exec_server(strtok(NULL, delim));
-			if (err)
-				fprintf(stderr, "%s: Error starting: %s\n",
-						__func__, strerror(err));
-		}
+		const char *dir = strtok(NULL, delim);
+		const char *jar = strtok(NULL, delim);
+		int err = exec_server(dir, jar);
+		if (err)
+			fprintf(stderr, "%s: Error starting: %s\n",
+					__func__, strerror(err));
+	} else if (strcmp(cmd, "!get") == 0) {
+		const char *url = strtok(NULL, delim);
+		size_t size;
+		char *p = net_get(url, &size);
+		fwrite(p, size, 1, stderr);
+		free(p);
 	} else {
 		fprintf(stderr, "%s: Unknown command: %s\n",
 				__func__, line);

@@ -9,12 +9,14 @@
 #include <sys/time.h>
 #include <sys/select.h>
 #include "cmd.h"
+#include "net.h"
 #include "exec.h"
 
 int main(int argc, char *argv[])
 {
 	fd_set rfds;
 	cmd_init();
+	net_init();
 
 loop:	// Setup file descriptors
 	FD_ZERO(&rfds);

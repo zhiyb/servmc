@@ -65,11 +65,11 @@ int exec_process(int err)
 	return 0;
 }
 
-int exec_server(const char *jar)
+int exec_server(const char *dir, const char *jar)
 {
 	if (pid >= 0)
 		return EBUSY;
-	fprintf(stderr, "%s: Process start: %s\n", __func__, jar);
+	fprintf(stderr, "%s: Starting %s in %s\n", __func__, jar, dir);
 	// Create input/output pipes
 	pipe(fdin);
 	pipe(fdout);
@@ -104,6 +104,14 @@ int exec_server(const char *jar)
 	dup2(fderr[WRITE], STDERR_FILENO);
 
 	// Execute
+	if (dir) {
+		int err = chdir(dir);
+		if (err) {
+			fprintf(stderr, "%s: Error changing directory: %s\n",
+					__func__, strerror(errno));
+			exit(0);
+		}
+	}
 	//execlp("bash", "bash", (char *)NULL);
 	execlp("java", "java", "-jar", jar, "nogui", (char *)NULL);
 	return 0;
@@ -113,7 +121,7 @@ void exec_quit()
 {
 	if (pid < 0)
 		return;
-	fprintf(stderr, "%s: Process quit\n", __func__);
+	fprintf(stderr, "%s: Process exit\n", __func__);
 	wait(NULL);
 	pid = -1;
 	fclose(fin);
