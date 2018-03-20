@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <pthread.h>
+#include "monitor.h"
 
 #define READ	0
 #define WRITE	1
@@ -13,8 +14,6 @@
 static pid_t pid = -1;
 static int fdin[2], fdout[2], fderr[2];
 static FILE *fin, *fout, *ferr;
-
-pthread_mutex_t mtxin, mtxout, mtxerr;
 
 int exec_status()
 {
@@ -25,11 +24,9 @@ void exec_write_stdin(const char *str)
 {
 	if (pid < 0)
 		return;
-	pthread_mutex_lock(&mtxin);
 	fputs(str, fin);
 	fputc('\n', fin);
 	fflush(fin);
-	pthread_mutex_unlock(&mtxin);
 }
 
 int exec_rfd(int err)
@@ -57,11 +54,12 @@ static char *exec_read(int err)
 
 int exec_process(int err)
 {
-	char *s = exec_read(err);
-	if (!s)
+	char *str = exec_read(err);
+	if (!str)
 		return EOF;
-	fputs(s, stdout);
-	free(s);
+	fputs(str, stdout);
+	monitor_line(str);
+	free(str);
 	return 0;
 }
 
@@ -70,19 +68,18 @@ int exec_server(const char *dir, const char *jar)
 	if (pid >= 0)
 		return EBUSY;
 	fprintf(stderr, "%s: Starting %s in %s\n", __func__, jar, dir);
+	monitor_server_start();
 	// Create input/output pipes
 	pipe(fdin);
 	pipe(fdout);
 	pipe(fderr);
-	// Initialise mutexes
-	pthread_mutex_init(&mtxin, NULL);
-	pthread_mutex_init(&mtxout, NULL);
-	pthread_mutex_init(&mtxerr, NULL);
 
 	// Create child process
 	pid = fork();
-	if (pid < 0)
+	if (pid < 0) {
+		monitor_server_stop();
 		return pid;
+	}
 
 	if (pid) {
 		// Parent process
@@ -112,13 +109,13 @@ int exec_server(const char *dir, const char *jar)
 			exit(0);
 		}
 	}
-	//execlp("bash", "bash", (char *)NULL);
 	execlp("java", "java", "-jar", jar, "nogui", (char *)NULL);
 	return 0;
 }
 
 void exec_quit()
 {
+	monitor_server_stop();
 	if (pid < 0)
 		return;
 	fprintf(stderr, "%s: Process exit\n", __func__);
