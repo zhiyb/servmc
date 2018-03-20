@@ -106,16 +106,21 @@ void update()
 	fprintf(stderr, "%s: Latest %s version: %s\n", __func__, type, ver);
 
 	// Download new version
-	free(p);
 	fprintf(stderr, "%s: Downloading %s\n", __func__, url);
+	free(p);
 	p = net_get(url, &size);
 
 	struct json_object *vobj = update_parse(p, size);
 	obj = update_server(vobj);
 	url = update_get_url(obj);
+	char file[strlen(path) + 1 + strlen(ver) + 4 + 1];
+	sprintf(file, "%s/%s.jar", path, ver);
 	const char *sha1 = update_get_sha1(obj);
-	fprintf(stderr, "%s: Downloading %s to %s/%s.jar (sha1sum: %s)\n",
-			__func__, url, path, ver, sha1);
+
+	// Download new sever JAR
+	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
+			__func__, url, file, sha1);
+	net_download(url, file, sha1);
 
 	free(p);
 	update_free(vobj);

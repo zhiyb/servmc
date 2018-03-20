@@ -35,7 +35,7 @@ static void cmd_line(char *line)
 		if (err)
 			fprintf(stderr, "%s: Error starting: %s\n",
 					__func__, strerror(err));
-	} else if (strcmp(cmd, "!mf") == 0) {
+	} else if (strcmp(cmd, "!update") == 0) {
 		update();
 	} else {
 		fprintf(stderr, "%s: Unknown command: %s\n",
