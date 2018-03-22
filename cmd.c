@@ -7,6 +7,7 @@
 #include "exec.h"
 #include "net.h"
 #include "update.h"
+#include "backup.h"
 #include "cmd.h"
 
 static void cmd_line(char *line)
@@ -20,7 +21,7 @@ static void cmd_line(char *line)
 			fprintf(stderr, "%s: JAR is not running\n",
 					__func__);
 		else
-			exec_write_stdin(line);
+			exec_write_stdin(line, 0);
 		goto ret;
 	}
 
@@ -37,6 +38,8 @@ static void cmd_line(char *line)
 					__func__, strerror(err));
 	} else if (strcmp(cmd, "!update") == 0) {
 		update();
+	} else if (strcmp(cmd, "!backup") == 0) {
+		backup_now();
 	} else {
 		fprintf(stderr, "%s: Unknown command: %s\n",
 				__func__, line);

@@ -11,6 +11,7 @@
 #include "cmd.h"
 #include "net.h"
 #include "exec.h"
+#include "backup.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,11 +32,14 @@ loop:	// Setup file descriptors
 	nfds = nfds >= fderr ? nfds : fderr;
 
 	// Wait for reading data
-	int ret = select(nfds + 1, &rfds, NULL, NULL, NULL);
-	if (ret < 0)
+	int ret = select(nfds + 1, &rfds, NULL, NULL, &(struct timeval){
+			.tv_sec = 10, .tv_usec = 0});
+	if (ret < 0) {
 		goto quit;
-	else if (ret == 0)
+	} else if (ret == 0) {
+		backup_tick();
 		goto loop;
+	}
 	if (FD_ISSET(cmd_rfd(), &rfds))
 		cmd_process();
 	int quit = 0;

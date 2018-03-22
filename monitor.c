@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <regex.h>
 #include <sys/types.h>
+#include "backup.h"
 #include "monitor.h"
 
 static struct monitor_t {
@@ -11,8 +12,8 @@ static struct monitor_t {
 } *monitor = NULL;
 
 static struct {
-	int running;
 	struct monitor_t *mon_server;
+	int running;
 } status = {
 	.running = 0,
 };
@@ -38,14 +39,20 @@ struct monitor_t *monitor_install(const char *regex, monitor_func_t func)
 	return p;
 }
 
-void monitor_uninstall(struct monitor_t *p)
+void monitor_uninstall(struct monitor_t **p)
 {
-	// Push to linked list
+	if (!*p)
+		return;
+	// Find the specified pointer in the list
 	struct monitor_t **mp = &monitor;
-	for (; *mp && *mp != p; mp = &(*mp)->next);
-	if (*mp)
+	for (; *mp && *mp != *p; mp = &(*mp)->next);
+	if (*mp) {
 		*mp = (*mp)->next;
-	free(p);
+		//regfree(&(*mp)->regex);
+	}
+	// Release resources
+	free(*p);
+	*p = NULL;
 }
 
 void monitor_line(const char *str)
@@ -56,7 +63,7 @@ void monitor_line(const char *str)
 			p->func(p, str);
 }
 
-static void server_done(struct monitor_t *mp, const char *str)
+static void server_ready(struct monitor_t *mp, const char *str)
 {
 	fprintf(stderr, "%s: Server ready\n", __func__);
 	status.running = 1;
@@ -70,11 +77,13 @@ int monitor_server_status()
 void monitor_server_start()
 {
 	status.mon_server = monitor_install(REGEX_SERVER(INFO)
-			"Done \\([0-9.]+s\\)!", server_done);
+			"Done \\([0-9.]+s\\)!", server_ready);
+	backup_start();
 }
 
 void monitor_server_stop()
 {
 	status.running = 0;
-	monitor_uninstall(status.mon_server);
+	backup_stop();
+	monitor_uninstall(&status.mon_server);
 }

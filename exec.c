@@ -20,13 +20,14 @@ int exec_status()
 	return pid;
 }
 
-void exec_write_stdin(const char *str)
+void exec_write_stdin(const char *str, int echo)
 {
 	if (pid < 0)
 		return;
-	fputs(str, fin);
-	fputc('\n', fin);
+	fprintf(fin, "%s\n", str);
 	fflush(fin);
+	if (echo)
+		printf("%s\n", str);
 }
 
 int exec_rfd(int err)
@@ -125,4 +126,10 @@ void exec_quit()
 	close(fdin[READ]);
 	fclose(fout);
 	fclose(ferr);
+}
+
+void exec_backup()
+{
+	fprintf(stderr, "%s: Executing backup commands\n", __func__);
+	// TODO
 }
