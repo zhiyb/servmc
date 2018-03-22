@@ -3,6 +3,10 @@
 #include <json.h>
 #include "net.h"
 #include "config.h"
+#include "monitor.h"
+
+static char *version = NULL;
+static int pending = 0;
 
 static struct json_object *find(struct json_object *obj, const char *name)
 {
@@ -99,10 +103,17 @@ void update()
 	char *p = net_get(MANIFEST_URL, &size);
 
 	struct json_object *root = update_parse(p, size);
-	const char *ver = update_latest(root, type);;
+	const char *ver = update_latest(root, type);
 	struct json_object *obj = update_version(root, ver);
 	const char *url = update_get_url(obj);
 	fprintf(stderr, "%s: Latest %s version: %s\n", __func__, type, ver);
+
+	if (version && strcmp(version, ver) == 0) {
+		fprintf(stderr, "%s: No update\n", __func__);
+		update_free(root);
+		free(p);
+		return;
+	}
 
 	// Download new version
 	fprintf(stderr, "%s: Downloading %s\n", __func__, url);
@@ -119,9 +130,26 @@ void update()
 	// Download new sever JAR
 	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
 			__func__, url, file, sha1);
-	net_download(url, file, sha1);
+	if (net_download(url, file, sha1) == 0) {
+		version = realloc(version, strlen(ver) + 1);
+		strcpy(version, ver);
+		pending = 1;
+	}
 
-	free(p);
-	update_free(vobj);
 	update_free(root);
+	update_free(vobj);
+	free(p);
+}
+
+const char *update_current()
+{
+	return version;
+}
+
+int update_pending(int clear)
+{
+	int v = pending;
+	if (clear)
+		pending = 0;
+	return v;
 }

@@ -23,10 +23,6 @@ int main(int argc, char *argv[])
 
 	// Initial steps
 	update();
-	int err = exec_server(SERVER_PATH, "18w11a.jar");
-	if (err)
-		fprintf(stderr, "%s: Error starting: %s\n",
-				__func__, strerror(err));
 
 loop:	// Setup file descriptors
 	FD_ZERO(&rfds);

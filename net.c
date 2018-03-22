@@ -1,6 +1,8 @@
 #include <errno.h>
 #include <libgen.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <curl/curl.h>
@@ -72,7 +74,26 @@ ret:
 
 int net_download(const char *url, const char *file, const char *sha1)
 {
-	if (net_status())
+	// Check file existence and size
+	struct stat st;
+	if (stat(file, &st) != 0)
+		goto dl;
+#if 0
+	// Check file integrity
+	int fd = open(file, O_RDONLY);
+	if (fd < 0)
+		goto dl;
+	void *buf = malloc(st.st_size);
+	if (read(fd, buf, st.st_size) == st.st_size) {
+		;
+	}
+	free(buf);
+	close(fd);
+#endif
+	fprintf(stderr, "%s: File %s exists, skip\n", __func__, file);
+	return 0;
+
+dl:	if (net_status())
 		return ENODEV;
 
 	CURL *curl = curl_easy_init();
