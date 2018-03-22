@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include "monitor.h"
+#include "config.h"
 
 #define READ	0
 #define WRITE	1
@@ -110,7 +111,7 @@ int exec_server(const char *dir, const char *jar)
 			exit(0);
 		}
 	}
-	execlp("java", "java", "-jar", jar, "nogui", (char *)NULL);
+	execlp(EXEC_JAVA, EXEC_JAVA, EXEC_ARGS, (char *)NULL);
 	return 0;
 }
 

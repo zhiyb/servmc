@@ -12,12 +12,21 @@
 #include "net.h"
 #include "exec.h"
 #include "backup.h"
+#include "update.h"
+#include "config.h"
 
 int main(int argc, char *argv[])
 {
 	fd_set rfds;
 	cmd_init();
 	net_init();
+
+	// Initial steps
+	update();
+	int err = exec_server(SERVER_PATH, "18w11a.jar");
+	if (err)
+		fprintf(stderr, "%s: Error starting: %s\n",
+				__func__, strerror(err));
 
 loop:	// Setup file descriptors
 	FD_ZERO(&rfds);
@@ -33,8 +42,9 @@ loop:	// Setup file descriptors
 
 	// Wait for reading data
 	int ret = select(nfds + 1, &rfds, NULL, NULL, &(struct timeval){
-			.tv_sec = 10, .tv_usec = 0});
+			.tv_sec = TICK_INTERVAL, .tv_usec = 0});
 	if (ret < 0) {
+		fprintf(stderr, "%s: select() failed\n", __func__);
 		goto quit;
 	} else if (ret == 0) {
 		backup_tick();
@@ -51,7 +61,8 @@ loop:	// Setup file descriptors
 			quit = 1;
 	if (quit)
 		exec_quit();
-	goto loop;
+	if (!cmd_shutdown())
+		goto loop;
 
 quit:
 	cmd_quit();

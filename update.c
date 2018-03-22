@@ -2,8 +2,7 @@
 #include <string.h>
 #include <json.h>
 #include "net.h"
-
-#define MFURL	"https://launchermeta.mojang.com/mc/game/version_manifest.json"
+#include "config.h"
 
 static struct json_object *find(struct json_object *obj, const char *name)
 {
@@ -91,13 +90,13 @@ static void update_free(struct json_object *obj)
 
 void update()
 {
-	static const char *type = "snapshot";
-	static const char *path = "server";
+	static const char *type = UPDATE_TYPE;
+	static const char *path = SERVER_PATH;
 
 	// Check version manifest
-	fprintf(stderr, "%s: Downloading %s\n", __func__, MFURL);
+	fprintf(stderr, "%s: Downloading %s\n", __func__, MANIFEST_URL);
 	size_t size;
-	char *p = net_get(MFURL, &size);
+	char *p = net_get(MANIFEST_URL, &size);
 
 	struct json_object *root = update_parse(p, size);
 	const char *ver = update_latest(root, type);;

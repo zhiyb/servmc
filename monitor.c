@@ -3,20 +3,20 @@
 #include <regex.h>
 #include <sys/types.h>
 #include "backup.h"
+#include "config.h"
 #include "monitor.h"
 
 static struct monitor_t {
 	struct monitor_t *next;
 	regex_t regex;
 	monitor_func_t func;
+	int enabled;
 } *monitor = NULL;
 
 static struct {
 	struct monitor_t *mon_server;
 	int running;
-} status = {
-	.running = 0,
-};
+} status = {NULL, 0};
 
 struct monitor_t *monitor_install(const char *regex, monitor_func_t func)
 {
@@ -35,6 +35,7 @@ struct monitor_t *monitor_install(const char *regex, monitor_func_t func)
 	p->next = NULL;
 	p->regex = reg;
 	p->func = func;
+	p->enabled = 1;
 	*mp = p;
 	return p;
 }
@@ -47,19 +48,29 @@ void monitor_uninstall(struct monitor_t **p)
 	struct monitor_t **mp = &monitor;
 	for (; *mp && *mp != *p; mp = &(*mp)->next);
 	if (*mp) {
+		regfree(&(*mp)->regex);
 		*mp = (*mp)->next;
-		//regfree(&(*mp)->regex);
 	}
 	// Release resources
 	free(*p);
 	*p = NULL;
 }
 
+void monitor_enable(struct monitor_t *p, int en)
+{
+	p->enabled = en;
+}
+
+int monitor_enabled(struct monitor_t *p)
+{
+	return p->enabled;
+}
+
 void monitor_line(const char *str)
 {
 	struct monitor_t *p = monitor;
 	for (; p; p = p->next)
-		if (regexec(&p->regex, str, 0, NULL, 0) == 0)
+		if (p->enabled && regexec(&p->regex, str, 0, NULL, 0) == 0)
 			p->func(p, str);
 }
 
@@ -76,8 +87,9 @@ int monitor_server_status()
 
 void monitor_server_start()
 {
-	status.mon_server = monitor_install(REGEX_SERVER(INFO)
-			"Done \\([0-9.]+s\\)!", server_ready);
+	if (!status.mon_server)
+		status.mon_server = monitor_install(REGEX_READY, server_ready);
+	monitor_enable(status.mon_server, 1);
 	backup_start();
 }
 
@@ -85,5 +97,5 @@ void monitor_server_stop()
 {
 	status.running = 0;
 	backup_stop();
-	monitor_uninstall(&status.mon_server);
+	monitor_enable(status.mon_server, 0);
 }

@@ -8,7 +8,10 @@
 #include "net.h"
 #include "update.h"
 #include "backup.h"
+#include "config.h"
 #include "cmd.h"
+
+static int shutdown = 0;
 
 static void cmd_line(char *line)
 {
@@ -40,6 +43,11 @@ static void cmd_line(char *line)
 		update();
 	} else if (strcmp(cmd, "!backup") == 0) {
 		backup_now();
+	} else if (strcmp(cmd, "!shutdown") == 0) {
+		fprintf(stderr, "%s: Shutting down\n", __func__);
+		shutdown = 1;
+		if (exec_status() >= 0)
+			exec_write_stdin(CMD_SHUTDOWN, 1);
 	} else {
 		fprintf(stderr, "%s: Unknown command: %s\n",
 				__func__, line);
@@ -52,7 +60,7 @@ ret:
 void cmd_init()
 {
 #if 0
-	// Handling SIGINT for gracefully exit
+	// Handling SIGINT for graceful exit
 	struct sigaction act = {
 	};
 	sigaction(SIGINT, NULL, NULL);
@@ -78,4 +86,10 @@ void cmd_process()
 void cmd_quit()
 {
 	rl_callback_handler_remove();
+}
+
+int cmd_shutdown()
+{
+	// Exit gracefully after server shutdown
+	return exec_status() < 0 ? shutdown : 0;
 }
