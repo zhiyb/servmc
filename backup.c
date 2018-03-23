@@ -62,8 +62,11 @@ static void backup_save(struct monitor_t *mp, const char *str)
 	status.schedule = (time_t)-1;
 	// Execute backup
 	fprintf(stderr, "%s: Backing up\n", __func__);
-	exec_backup();
-	fprintf(stderr, "%s: Backup done\n", __func__);
+	int ret = exec_backup();
+	if (ret)
+		fprintf(stderr, "%s: Backup failed: %d\n", __func__, ret);
+	else
+		fprintf(stderr, "%s: Backup done\n", __func__);
 	// Disable callback
 	monitor_enable(status.mon_save, 0);
 
@@ -71,7 +74,7 @@ static void backup_save(struct monitor_t *mp, const char *str)
 		return;
 	// Turn on autosave
 	exec_write_stdin(CMD_SAVE_ON, ECHO_CMD);
-	exec_write_stdin(CMD_SAVE_MSG, ECHO_CMD);
+	exec_write_stdin(ret ? CMD_SAVE_FAIL : CMD_SAVE_MSG, ECHO_CMD);
 	// Check number of online players
 	exec_write_stdin(CMD_PLAYERS, ECHO_CMD);
 	monitor_enable(status.mon_list, 1);
@@ -82,8 +85,9 @@ static void backup_prepare()
 	fprintf(stderr, "%s: Starting backup process\n", __func__);
 	status.schedule = (time_t)-1;
 	// Turn off autosave, save game now
-	exec_write_stdin(CMD_SAVE_OFF, ECHO_CMD);
+	exec_write_stdin(CMD_SAVE_ON, ECHO_CMD);
 	exec_write_stdin(CMD_SAVE_ALL, ECHO_CMD);
+	exec_write_stdin(CMD_SAVE_OFF, ECHO_CMD);
 	// Wait for save complete
 	monitor_enable(status.mon_save, 1);
 	// Disable unnecessary callbacks

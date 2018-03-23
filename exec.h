@@ -3,7 +3,7 @@
 int exec_server(const char *dir, const char *jar);
 void exec_quit();
 
-void exec_backup();
+int exec_backup();
 
 int exec_status();
 void exec_write_stdin(const char *str, int echo);

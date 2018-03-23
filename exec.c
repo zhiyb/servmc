@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include "monitor.h"
+#include "update.h"
 #include "config.h"
 
 #define READ	0
@@ -129,8 +130,14 @@ void exec_quit()
 	monitor_server_stop();
 }
 
-void exec_backup()
+int exec_backup()
 {
 	fprintf(stderr, "%s: Executing backup commands\n", __func__);
-	// TODO
+	pid_t pid = fork();
+	if (!pid)
+		execl(EXEC_BACKUP, EXEC_BACKUP,
+				SERVER_PATH, update_current(), (char *)NULL);
+	int status = -1;
+	waitpid(pid, &status, 0);
+	return WEXITSTATUS(status);
 }
