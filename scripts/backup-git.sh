@@ -16,7 +16,5 @@ time="$(date -Iseconds)"
 msg="$world $time $ver"
 echo "Backup as: $msg"
 
-until git add .; do
-	sleep 1
-done
+git add .
 git commit -m "$msg"

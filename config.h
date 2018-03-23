@@ -36,7 +36,7 @@
 // Server control commands
 #define CMD_SAVE_ON	"save-on"
 #define CMD_SAVE_OFF	"save-off"
-#define CMD_SAVE_ALL	"save-all"
+#define CMD_SAVE_ALL	"save-all flush"
 #define CMD_SAVE_DONE	"say §a"
 #define CMD_SAVE_FAIL	"say §c"
 #define CMD_PLAYERS	"list"

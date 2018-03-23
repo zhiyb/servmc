@@ -96,9 +96,8 @@ static void backup_prepare()
 	fprintf(stderr, "%s: Starting backup process\n", __func__);
 	status.schedule = (time_t)-1;
 	// Turn off autosave, save game now
-	exec_write_stdin(CMD_SAVE_ON, ECHO_CMD);
-	exec_write_stdin(CMD_SAVE_ALL, ECHO_CMD);
 	exec_write_stdin(CMD_SAVE_OFF, ECHO_CMD);
+	exec_write_stdin(CMD_SAVE_ALL, ECHO_CMD);
 	// Wait for save complete
 	monitor_enable(status.mon_save, 1);
 	// Disable unnecessary callbacks
