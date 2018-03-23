@@ -1,4 +1,4 @@
-SRC	= main.c exec.c cmd.c net.c update.c monitor.c backup.c
+SRC	= main.c exec.c cmd.c net.c update.c monitor.c backup.c restart.c
 TRG	= servmc
 
 OBJ	= $(SRC:.c=.o)

@@ -4,6 +4,7 @@
 #include "net.h"
 #include "config.h"
 #include "monitor.h"
+#include "restart.h"
 
 static char *version = NULL;
 static int pending = 0;
@@ -108,12 +109,14 @@ void update()
 	const char *url = update_get_url(obj);
 	fprintf(stderr, "%s: Latest %s version: %s\n", __func__, type, ver);
 
+#if 0
 	if (version && strcmp(version, ver) == 0) {
 		fprintf(stderr, "%s: No update\n", __func__);
 		update_free(root);
 		free(p);
 		return;
 	}
+#endif
 
 	// Download new version
 	fprintf(stderr, "%s: Downloading %s\n", __func__, url);
@@ -131,9 +134,10 @@ void update()
 	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
 			__func__, url, file, sha1);
 	if (net_download(url, file, sha1) == 0) {
+		pending = !!version;
 		version = realloc(version, strlen(ver) + 1);
 		strcpy(version, ver);
-		pending = 1;
+		restart_schedule();
 	}
 
 	update_free(root);

@@ -14,6 +14,7 @@
 #include "backup.h"
 #include "update.h"
 #include "config.h"
+#include "restart.h"
 
 int main(int argc, char *argv[])
 {
@@ -43,7 +44,9 @@ loop:	// Setup file descriptors
 		fprintf(stderr, "%s: select() failed\n", __func__);
 		goto quit;
 	} else if (ret == 0) {
+		// Timeout, evaluate event tick
 		backup_tick();
+		restart_tick();
 		goto loop;
 	}
 	if (FD_ISSET(cmd_rfd(), &rfds))

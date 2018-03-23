@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include "backup.h"
 #include "config.h"
+#include "restart.h"
 #include "monitor.h"
 
 static struct monitor_t {
@@ -35,7 +36,7 @@ struct monitor_t *monitor_install(const char *regex, monitor_func_t func)
 	p->next = NULL;
 	p->regex = reg;
 	p->func = func;
-	p->enabled = 1;
+	p->enabled = 0;
 	*mp = p;
 	return p;
 }
@@ -58,12 +59,13 @@ void monitor_uninstall(struct monitor_t **p)
 
 void monitor_enable(struct monitor_t *p, int en)
 {
-	p->enabled = en;
+	if (p)
+		p->enabled = en;
 }
 
 int monitor_enabled(struct monitor_t *p)
 {
-	return p->enabled;
+	return p ? p->enabled : 0;
 }
 
 void monitor_line(const char *str)
@@ -96,6 +98,7 @@ void monitor_server_start()
 void monitor_server_stop()
 {
 	status.running = 0;
-	backup_stop();
 	monitor_enable(status.mon_server, 0);
+	backup_stop();
+	restart();
 }

@@ -36,11 +36,9 @@ static void backup_list(struct monitor_t *mp, const char *str)
 	monitor_enable(status.mon_list, 0);
 	// Extract number of online players
 	static regex_t regex = {.re_nsub = 0};
-	if (regex.re_nsub == 0) {
-		fprintf(stderr, "%s: Compiling regex\n", __func__);
+	if (regex.re_nsub == 0)
 		if (regcomp(&regex, REGEX_PLAYERS, REG_EXTENDED | REG_NEWLINE))
 			fprintf(stderr, "%s: Cannot compile regex\n", __func__);
-	}
 	// Schedule next backup
 	regmatch_t match[2];
 	if (regex.re_nsub && regexec(&regex, str, 2, match, 0) == 0 &&
@@ -61,6 +59,7 @@ static void backup_list(struct monitor_t *mp, const char *str)
 
 static void backup_save(struct monitor_t *mp, const char *str)
 {
+	status.schedule = (time_t)-1;
 	// Execute backup
 	fprintf(stderr, "%s: Backing up\n", __func__);
 	exec_backup();
@@ -71,10 +70,10 @@ static void backup_save(struct monitor_t *mp, const char *str)
 	if (!monitor_server_status())
 		return;
 	// Turn on autosave
-	exec_write_stdin(CMD_SAVE_ON, 1);
-	exec_write_stdin(CMD_SAVE_MSG, 1);
+	exec_write_stdin(CMD_SAVE_ON, ECHO_CMD);
+	exec_write_stdin(CMD_SAVE_MSG, ECHO_CMD);
 	// Check number of online players
-	exec_write_stdin(CMD_PLAYERS, 1);
+	exec_write_stdin(CMD_PLAYERS, ECHO_CMD);
 	monitor_enable(status.mon_list, 1);
 }
 
@@ -83,8 +82,8 @@ static void backup_prepare()
 	fprintf(stderr, "%s: Starting backup process\n", __func__);
 	status.schedule = (time_t)-1;
 	// Turn off autosave, save game now
-	exec_write_stdin(CMD_SAVE_OFF, 1);
-	exec_write_stdin(CMD_SAVE_ALL, 1);
+	exec_write_stdin(CMD_SAVE_OFF, ECHO_CMD);
+	exec_write_stdin(CMD_SAVE_ALL, ECHO_CMD);
 	// Wait for save complete
 	monitor_enable(status.mon_save, 1);
 	// Disable unnecessary callbacks

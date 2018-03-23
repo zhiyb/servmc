@@ -8,6 +8,7 @@
 #include "net.h"
 #include "update.h"
 #include "backup.h"
+#include "restart.h"
 #include "config.h"
 #include "cmd.h"
 
@@ -21,7 +22,7 @@ static void cmd_line(char *line)
 	// Send strings to server process
 	if (*line != '!') {
 		if (exec_status() < 0)
-			fprintf(stderr, "%s: JAR is not running\n",
+			fprintf(stderr, "%s: Server is not running\n",
 					__func__);
 		else
 			exec_write_stdin(line, 0);
@@ -30,24 +31,22 @@ static void cmd_line(char *line)
 
 	// Process special commands
 	char *cmd = strtok(line, delim);
-	if (strcmp(cmd, "!exec") == 0) {
-		printf("%s:%u exec\n", __func__, __LINE__);
-	} else if (strcmp(cmd, "!jar") == 0) {
-		const char *dir = strtok(NULL, delim);
-		const char *jar = strtok(NULL, delim);
-		int err = exec_server(dir, jar);
-		if (err)
-			fprintf(stderr, "%s: Error starting: %s\n",
-					__func__, strerror(err));
+	if (strcmp(cmd, "!restart") == 0) {
+		restart_schedule();
 	} else if (strcmp(cmd, "!update") == 0) {
 		update();
 	} else if (strcmp(cmd, "!backup") == 0) {
 		backup_now();
+	} else if (strcmp(cmd, "!stop") == 0) {
+		if (exec_status() >= 0) {
+			fprintf(stderr, "%s: Stopping server\n", __func__);
+			exec_write_stdin(CMD_SHUTDOWN, ECHO_CMD);
+		}
 	} else if (strcmp(cmd, "!shutdown") == 0) {
 		fprintf(stderr, "%s: Shutting down\n", __func__);
 		shutdown = 1;
 		if (exec_status() >= 0)
-			exec_write_stdin(CMD_SHUTDOWN, 1);
+			exec_write_stdin(CMD_SHUTDOWN, ECHO_CMD);
 	} else {
 		fprintf(stderr, "%s: Unknown command: %s\n",
 				__func__, line);

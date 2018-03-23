@@ -117,7 +117,6 @@ int exec_server(const char *dir, const char *jar)
 
 void exec_quit()
 {
-	monitor_server_stop();
 	if (pid < 0)
 		return;
 	fprintf(stderr, "%s: Process exit\n", __func__);
@@ -127,6 +126,7 @@ void exec_quit()
 	close(fdin[READ]);
 	fclose(fout);
 	fclose(ferr);
+	monitor_server_stop();
 }
 
 void exec_backup()
