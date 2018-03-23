@@ -1,13 +1,18 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include <json.h>
 #include "net.h"
+#include "exec.h"
 #include "config.h"
 #include "monitor.h"
 #include "restart.h"
 
-static char *version = NULL;
-static int pending = 0;
+static struct {
+	char *version;
+	int pending;
+	time_t schedule;
+} status = {NULL, 0, (time_t)-1};
 
 static struct json_object *find(struct json_object *obj, const char *name)
 {
@@ -109,14 +114,10 @@ void update()
 	const char *url = update_get_url(obj);
 	fprintf(stderr, "%s: Latest %s version: %s\n", __func__, type, ver);
 
-#if 0
-	if (version && strcmp(version, ver) == 0) {
+	if (status.version && strcmp(status.version, ver) == 0) {
 		fprintf(stderr, "%s: No update\n", __func__);
-		update_free(root);
-		free(p);
-		return;
+		goto ret;
 	}
-#endif
 
 	// Download new version
 	fprintf(stderr, "%s: Downloading %s\n", __func__, url);
@@ -126,34 +127,50 @@ void update()
 	struct json_object *vobj = update_parse(p, size);
 	obj = update_server(vobj);
 	url = update_get_url(obj);
-	char file[strlen(path) + 1 + strlen(ver) + 4 + 1];
-	sprintf(file, "%s/%s.jar", path, ver);
-	const char *sha1 = update_get_sha1(obj);
+	{
+		char file[strlen(path) + 1 + strlen(ver) + 4 + 1];
+		sprintf(file, "%s/%s.jar", path, ver);
+		const char *sha1 = update_get_sha1(obj);
 
-	// Download new sever JAR
-	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
-			__func__, url, file, sha1);
-	if (net_download(url, file, sha1) == 0) {
-		pending = !!version;
-		version = realloc(version, strlen(ver) + 1);
-		strcpy(version, ver);
-		restart_schedule();
+		// Download new sever JAR
+		if (net_download(url, file, sha1) == 0) {
+			status.pending = !!status.version;
+			status.version = realloc(status.version,
+					strlen(ver) + 1);
+			strcpy(status.version, ver);
+			restart_schedule();
+		}
+
 	}
 
-	update_free(root);
 	update_free(vobj);
+ret:	update_free(root);
 	free(p);
+	status.schedule = time(NULL) + UPDATE_INTERVAL;
+}
+
+void update_tick()
+{
+	if (status.schedule == (time_t)-1)
+		return;
+	// Wait until scheduled time passed
+	if (time(NULL) - status.schedule < 0)
+		return;
+	// It is not safe to start update during server start up
+	if (exec_status() >= 0 && !monitor_server_status())
+		return;
+	update();
 }
 
 const char *update_current()
 {
-	return version;
+	return status.version;
 }
 
 int update_pending(int clear)
 {
-	int v = pending;
+	int v = status.pending;
 	if (clear)
-		pending = 0;
+		status.pending = 0;
 	return v;
 }

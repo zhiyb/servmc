@@ -46,6 +46,7 @@ loop:	// Setup file descriptors
 	} else if (ret == 0) {
 		// Timeout, evaluate event tick
 		backup_tick();
+		update_tick();
 		restart_tick();
 		goto loop;
 	}

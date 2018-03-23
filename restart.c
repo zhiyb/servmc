@@ -35,6 +35,8 @@ static void restart_now()
 
 void restart()
 {
+	if (cmd_shutdown())
+		return;
 	// Scheduled restart if the server stopped unexpectedly
 	if (!update_pending(1)) {
 		status.schedule = time(NULL) + RESTART_INTERVAL;

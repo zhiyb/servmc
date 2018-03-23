@@ -85,7 +85,7 @@ int net_download(const char *url, const char *file, const char *sha1)
 		goto dl;
 	void *buf = malloc(st.st_size);
 	if (read(fd, buf, st.st_size) == st.st_size) {
-		;
+		// TODO
 	}
 	free(buf);
 	close(fd);
@@ -93,7 +93,10 @@ int net_download(const char *url, const char *file, const char *sha1)
 	fprintf(stderr, "%s: File %s exists, skip\n", __func__, file);
 	return 0;
 
-dl:	if (net_status())
+dl:	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
+			__func__, url, file, sha1);
+
+	if (net_status())
 		return ENODEV;
 
 	CURL *curl = curl_easy_init();
