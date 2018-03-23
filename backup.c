@@ -62,6 +62,7 @@ static void backup_save(struct monitor_t *mp, const char *str)
 	status.schedule = (time_t)-1;
 	// Execute backup
 	fprintf(stderr, "%s: Backing up\n", __func__);
+	time_t tm = time(NULL);
 	int ret = exec_backup();
 	if (ret)
 		fprintf(stderr, "%s: Backup failed: %d\n", __func__, ret);
@@ -70,11 +71,21 @@ static void backup_save(struct monitor_t *mp, const char *str)
 	// Disable callback
 	monitor_enable(status.mon_save, 0);
 
+	// Send message to server
 	if (!monitor_server_status())
 		return;
+	char msg[64];
+	int ofs = snprintf(msg, sizeof(msg), "%s%s",
+			ret ? CMD_SAVE_FAIL : CMD_SAVE_DONE, ctime(&tm)) - 1;
+	if (ret)
+		snprintf(msg + ofs, sizeof(msg) - ofs,
+				" | Backup failed: %d", ret);
+	else
+		snprintf(msg + ofs, sizeof(msg) - ofs, " | Backup done");
+	exec_write_stdin(msg, ECHO_CMD);
+
 	// Turn on autosave
 	exec_write_stdin(CMD_SAVE_ON, ECHO_CMD);
-	exec_write_stdin(ret ? CMD_SAVE_FAIL : CMD_SAVE_MSG, ECHO_CMD);
 	// Check number of online players
 	exec_write_stdin(CMD_PLAYERS, ECHO_CMD);
 	monitor_enable(status.mon_list, 1);
