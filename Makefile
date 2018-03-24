@@ -1,4 +1,4 @@
-SRCS	= main.c exec.c cmd.c net.c update.c monitor.c backup.c restart.c
+SRCS	= main.c exec.c cmd.c net.c update.c monitor.c backup.c restart.c web.c
 TRG	= servmc
 
 OBJS	= $(SRCS:.c=.o)

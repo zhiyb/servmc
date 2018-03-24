@@ -10,6 +10,7 @@
 #include <sys/select.h>
 #include "cmd.h"
 #include "net.h"
+#include "web.h"
 #include "exec.h"
 #include "backup.h"
 #include "update.h"
@@ -24,6 +25,9 @@ int main(int argc, char *argv[])
 
 	// Initial steps
 	update();
+	if (!update_current())
+		return 1;
+	web_init();
 
 loop:	// Setup file descriptors
 	FD_ZERO(&rfds);
@@ -65,7 +69,8 @@ loop:	// Setup file descriptors
 		goto loop;
 
 quit:
-	cmd_quit();
 	exec_quit();
+	web_quit();
+	cmd_quit();
 	return 0;
 }
