@@ -6,8 +6,16 @@
 #define RX_BUFFER_SIZE	256
 
 static pthread_t thread;
+static pthread_mutex_t msgs_mutex;
 static struct lws_context *lws_ctx = NULL;
+static struct lws *client = NULL;
 static int quit = 0;
+static struct message_t {
+	struct message_t * volatile next;
+	const char *colour;
+	char *msg;
+	size_t size;
+} * volatile msgs;
 
 static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		void *user, void *in, size_t len);
@@ -30,19 +38,52 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 	return 0;
 }
 
+static void web_write_message(struct lws *wsi)
+{
+	if (!msgs)
+		return;
+
+	// Detach the oldest message from the queue
+	pthread_mutex_lock(&msgs_mutex);
+	struct message_t *mp = msgs;
+	msgs = msgs->next;
+	pthread_mutex_unlock(&msgs_mutex);
+
+	lws_write(wsi, (void *)(mp->msg + LWS_PRE), mp->size, LWS_WRITE_TEXT);
+	free(mp->msg);
+	free(mp);
+
+	if (msgs)
+		lws_callback_on_writable(wsi);
+}
+
 static int web_console(struct lws *wsi, enum lws_callback_reasons reason,
 		void *user, void *in, size_t len)
 {
-	if (reason == LWS_CALLBACK_RECEIVE) {
-	} else if (reason == LWS_CALLBACK_SERVER_WRITEABLE) {
+	switch (reason) {
+	case LWS_CALLBACK_ESTABLISHED:
+		client = wsi;
+		break;
+	case LWS_CALLBACK_CLOSED:
+		client = NULL;
+		break;
+	case LWS_CALLBACK_SERVER_WRITEABLE:
+		web_write_message(wsi);
+		break;
+	case LWS_CALLBACK_RECEIVE:
+	default:
+		break;
 	}
 	return 0;
 }
 
 static void *web_thread(void *args)
 {
-	while (!quit)
-		lws_service(lws_ctx, 1000);
+	while (!quit) {
+		lws_service(lws_ctx, 200);
+		if (msgs && client)
+			lws_callback_on_writable(client);
+	}
 	return NULL;
 }
 
@@ -61,13 +102,48 @@ void web_init()
 	lws_set_log_level(7, web_log);
 	lws_ctx = lws_create_context(&info);
 	quit = 0;
+	pthread_mutex_init(&msgs_mutex, NULL);
 	pthread_create(&thread, NULL, web_thread, NULL);
 }
 
 void web_quit()
 {
 	quit = 1;
+	lws_cancel_service(lws_ctx);
 	pthread_join(thread, NULL);
 	lws_context_destroy(lws_ctx);
 	lws_ctx = NULL;
+	client = NULL;
+	pthread_mutex_destroy(&msgs_mutex);
+}
+
+static void web_enqueue(struct message_t *m)
+{
+	// Append to message list
+	pthread_mutex_lock(&msgs_mutex);
+	struct message_t * volatile *mp = &msgs;
+	for (; *mp; mp = &(*mp)->next);
+	*mp = m;
+	pthread_mutex_unlock(&msgs_mutex);
+}
+
+void web_message(const char *colour, size_t size, const char *fmt, va_list ap)
+{
+	if (!client)
+		return;
+	struct message_t *m = malloc(sizeof(struct message_t));
+	m->next = NULL;
+	m->colour = colour;
+	m->msg = malloc(size + LWS_PRE);
+	m->size = vsnprintf(m->msg + LWS_PRE, size, fmt, ap) + 1;
+	web_enqueue(m);
+}
+
+void web_message_f(const char *colour, const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	int ret = vsnprintf(NULL, 0, fmt, args);
+	web_message(colour, ret + 1, fmt, args);
+	va_end(args);
 }

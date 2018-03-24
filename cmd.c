@@ -7,6 +7,7 @@
 #include <readline/history.h>
 #include "net.h"
 #include "cmd.h"
+#include "web.h"
 #include "exec.h"
 #include "update.h"
 #include "backup.h"
@@ -18,8 +19,8 @@ static int shutdown = 0;
 
 static void cmd_help()
 {
-	cmd_external(CLR_EXTERNAL);
-	printf(	"!restart:  Restart the server when no players online\n"
+	cmd_printf(CLR_EXTERNAL,
+		"!restart:  Restart the server when no players online\n"
 		"!shutdown: Shutdown the server when no players online\n"
 		"!stop:     Stop the server immediately, then restart\n"
 		"!quit:     Shutdown the server immediately\n"
@@ -34,6 +35,7 @@ static void cmd_line(char *line)
 	if (!*line)
 		return;
 	add_history(line);
+	web_message_f(CLR_INPUT, "%s%s\n", INPUT_PROMPT, line);
 
 	// Send strings to server process
 	if (*line != '!') {
@@ -95,7 +97,7 @@ void cmd_init()
 
 	// Setup readline
 	//rl_getc_function = getc;
-	rl_callback_handler_install(CLR_INPUT "servmc> ",
+	rl_callback_handler_install(CLR_INPUT INPUT_PROMPT,
 			(rl_vcpfunc_t *)&cmd_line);
 	using_history();
 	stifle_history(1000);
@@ -134,9 +136,10 @@ int cmd_printf(const char *colour, const char *fmt, ...)
 	printf("\33[2K\r\e[0m%s", colour);
 	va_list args;
 	va_start(args, fmt);
-	int res = vprintf(fmt, args);
+	int ret = vprintf(fmt, args);
+	web_message(colour, ret + 1, fmt, args);
 	va_end(args);
 	if (!RL_ISSTATE(RL_STATE_DONE))
 		rl_forced_update_display();
-	return res;
+	return ret;
 }

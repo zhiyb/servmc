@@ -25,6 +25,8 @@
 #define ECHO_CMD	1
 // Web server port
 #define WEB_PORT	25580
+// Command line input prompt
+#define INPUT_PROMPT	"servmc> "
 
 // Server info string matching regression expressions
 #define REGEX_SERVER(type) "^\\[[0-9]{2}:[0-9]{2}:[0-9]{2}\\] " \
@@ -56,3 +58,4 @@
 #define CLR_ERROR	"\33[31m"
 #define CLR_EXTERNAL	"\33[33m"
 #define CLR_LIBWS	"\33[34m"
+#define CLR_WEB		"\33[94m"
