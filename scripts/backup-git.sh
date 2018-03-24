@@ -18,3 +18,4 @@ echo "Backup as: $msg"
 
 git add .
 git commit -m "$msg"
+git gc

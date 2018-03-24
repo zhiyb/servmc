@@ -20,7 +20,7 @@
 // Programs and arguments
 #define EXEC_JAVA	"java"
 #define EXEC_ARGS	"-jar", jar, "nogui"
-#define EXEC_BACKUP	"scripts/backup-git.sh"
+#define EXEC_BACKUP	"scripts/backup.sh"
 // Echo commands executed by management console
 #define ECHO_CMD	1
 
