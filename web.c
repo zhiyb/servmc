@@ -8,7 +8,7 @@
 static pthread_t thread;
 static pthread_mutex_t msgs_mutex;
 static struct lws_context *lws_ctx = NULL;
-static struct lws *client = NULL;
+static struct lws * volatile client = NULL;
 static int quit = 0;
 static struct message_t {
 	struct message_t * volatile next;
@@ -62,15 +62,22 @@ static int web_console(struct lws *wsi, enum lws_callback_reasons reason,
 {
 	switch (reason) {
 	case LWS_CALLBACK_ESTABLISHED:
+		if (client)
+			lws_callback_on_writable(client);
 		client = wsi;
 		break;
 	case LWS_CALLBACK_CLOSED:
-		client = NULL;
+		if (client == wsi)
+			client = NULL;
 		break;
 	case LWS_CALLBACK_SERVER_WRITEABLE:
+		if (client != wsi)
+			return -1;
 		web_write_message(wsi);
 		break;
 	case LWS_CALLBACK_RECEIVE:
+		if (client != wsi)
+			return -1;
 		user = malloc(len + 1);
 		memcpy(user, in, len);
 		*((char *)user + len) = 0;
