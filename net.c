@@ -6,6 +6,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <curl/curl.h>
+#include "cmd.h"
+#include "config.h"
 
 struct net_data_t {
 	curl_off_t size;
@@ -40,7 +42,7 @@ char *net_get(const char *url, size_t *size)
 
 	FILE *fp = tmpfile();
 	if (!fp) {
-		fprintf(stderr, "%s: Temporary file error: %s\n",
+		cmd_printf(CLR_ERROR, "%s: Temporary file error: %s\n",
 				__func__, strerror(errno));
 		return NULL;
 	}
@@ -53,7 +55,7 @@ char *net_get(const char *url, size_t *size)
 	res = curl_easy_perform(curl);
 
 	if (res != CURLE_OK) {
-		fprintf(stderr, "%s: libcurl error: %s\n",
+		cmd_printf(CLR_ERROR, "%s: libcurl error: %s\n",
 				__func__, curl_easy_strerror(res));
 		goto ret;
 	}
@@ -90,10 +92,10 @@ int net_download(const char *url, const char *file, const char *sha1)
 	free(buf);
 	close(fd);
 #endif
-	fprintf(stderr, "%s: File %s exists, skip\n", __func__, file);
+	cmd_printf(CLR_MESSAGE, "%s: File %s exists, skip\n", __func__, file);
 	return 0;
 
-dl:	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
+dl:	cmd_printf(CLR_MESSAGE, "%s: Downloading %s to %s (sha1sum: %s)\n",
 			__func__, url, file, sha1);
 
 	if (net_status())
@@ -108,14 +110,14 @@ dl:	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
 	const char *dir = dirname(path);
 	int err = mkdir(dir, 0755);
 	if (err && errno != EEXIST) {
-		fprintf(stderr, "%s: Cannot create directory %s: %s\n",
+		cmd_printf(CLR_ERROR, "%s: Cannot create directory %s: %s\n",
 				__func__, dir, strerror(errno));
 		return errno;
 	}
 
 	FILE *fp = fopen(file, "wb");
 	if (!fp) {
-		fprintf(stderr, "%s: Cannot open file for write: %s\n",
+		cmd_printf(CLR_ERROR, "%s: Cannot open file for write: %s\n",
 				__func__, strerror(errno));
 		return errno;
 	}
@@ -129,7 +131,7 @@ dl:	fprintf(stderr, "%s: Downloading %s to %s (sha1sum: %s)\n",
 	fclose(fp);
 
 	if (res != CURLE_OK) {
-		fprintf(stderr, "%s: libcurl error: %s\n",
+		cmd_printf(CLR_ERROR, "%s: libcurl error: %s\n",
 				__func__, curl_easy_strerror(res));
 		return EIO;
 	}

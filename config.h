@@ -22,7 +22,7 @@
 #define EXEC_ARGS	"-jar", jar, "nogui"
 #define EXEC_BACKUP	"scripts/backup-git.sh"
 // Echo commands executed by management console
-#define ECHO_CMD	0
+#define ECHO_CMD	1
 
 // Server info string matching regression expressions
 #define REGEX_SERVER(type) "^\\[[0-9]{2}:[0-9]{2}:[0-9]{2}\\] " \
@@ -41,3 +41,14 @@
 #define CMD_SAVE_FAIL	"say §c"
 #define CMD_PLAYERS	"list"
 #define CMD_SHUTDOWN	"stop"
+
+// Coloured outputs
+#define CLR_INPUT	"\33[97m"
+#define CLR_STDOUT	"\33[0m"
+#define CLR_STDERR	"\33[1;31m"
+#define CLR_ECHO	"\33[90m"
+#define CLR_MESSAGE	"\33[36m"
+#define CLR_BACKUP	"\33[32m"
+#define CLR_UPDATE	"\33[35m"
+#define CLR_ERROR	"\33[31m"
+#define CLR_EXTERNAL	"\33[33m"

@@ -3,10 +3,11 @@
 #include <time.h>
 #include <json.h>
 #include "net.h"
+#include "cmd.h"
 #include "exec.h"
-#include "config.h"
 #include "monitor.h"
 #include "restart.h"
+#include "config.h"
 
 static struct {
 	char *version;
@@ -23,7 +24,7 @@ static struct json_object *find(struct json_object *obj, const char *name)
 			return json_object_iter_peek_value(&it);
 		json_object_iter_next(&it);
 	}
-	fprintf(stderr, "%s: Cannot find %s in JSON\n", __func__, name);
+	cmd_printf(CLR_ERROR, "%s: Cannot find %s in JSON\n", __func__, name);
 	return NULL;
 }
 
@@ -34,7 +35,7 @@ static struct json_object *update_parse(const char *doc, size_t size)
 
 	int err = json_tokener_get_error(tok);
 	if (err != json_tokener_success) {
-		fprintf(stderr, "%s: Error parsing json: %s\n",
+		cmd_printf(CLR_ERROR, "%s: Error parsing json: %s\n",
 				__func__, json_tokener_error_desc(err));
 		goto ret;
 	}
@@ -104,7 +105,8 @@ void update()
 	static const char *path = SERVER_PATH;
 
 	// Check version manifest
-	fprintf(stderr, "%s: Downloading %s\n", __func__, MANIFEST_URL);
+	cmd_printf(CLR_UPDATE, "%s: Downloading %s\n",
+			__func__, MANIFEST_URL);
 	size_t size;
 	char *p = net_get(MANIFEST_URL, &size);
 
@@ -112,15 +114,16 @@ void update()
 	const char *ver = update_latest(root, type);
 	struct json_object *obj = update_version(root, ver);
 	const char *url = update_get_url(obj);
-	fprintf(stderr, "%s: Latest %s version: %s\n", __func__, type, ver);
+	cmd_printf(CLR_UPDATE, "%s: Latest %s version: %s\n",
+			__func__, type, ver);
 
 	if (status.version && strcmp(status.version, ver) == 0) {
-		fprintf(stderr, "%s: No update\n", __func__);
+		cmd_printf(CLR_UPDATE, "%s: No update\n", __func__);
 		goto ret;
 	}
 
 	// Download new version
-	fprintf(stderr, "%s: Downloading %s\n", __func__, url);
+	cmd_printf(CLR_UPDATE, "%s: Downloading %s\n", __func__, url);
 	free(p);
 	p = net_get(url, &size);
 

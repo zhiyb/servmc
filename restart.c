@@ -20,7 +20,8 @@ static void restart_now()
 	if (cmd_shutdown())
 		return;
 	if (!update_current()) {
-		fprintf(stderr, "%s: Version info not available\n", __func__);
+		cmd_printf(CLR_ERROR, "%s: Version info not available\n",
+				__func__);
 		return;
 	}
 
@@ -29,7 +30,7 @@ static void restart_now()
 	sprintf(jar, "%s.jar", ver);
 	int err = exec_server(SERVER_PATH, jar);
 	if (err)
-		fprintf(stderr, "%s: Error starting server: %s\n",
+		cmd_printf(CLR_ERROR, "%s: Error starting server: %s\n",
 				__func__, strerror(err));
 }
 
@@ -40,7 +41,7 @@ void restart()
 	// Scheduled restart if the server stopped unexpectedly
 	if (!update_pending(1)) {
 		status.schedule = time(NULL) + RESTART_INTERVAL;
-		fprintf(stderr, "%s: Server restart scheduled at %s",
+		cmd_printf(CLR_MESSAGE, "%s: Server restart scheduled at %s",
 				__func__, ctime(&status.schedule));
 	} else {
 		restart_now();
@@ -74,20 +75,22 @@ static void restart_list(struct monitor_t *mp, const char *str)
 	static regex_t regex = {.re_nsub = 0};
 	if (regex.re_nsub == 0)
 		if (regcomp(&regex, REGEX_PLAYERS, REG_EXTENDED | REG_NEWLINE))
-			fprintf(stderr, "%s: Cannot compile regex\n", __func__);
+			cmd_printf(CLR_ERROR, "%s: Cannot compile regex\n",
+					__func__);
 	// Check number of online players
 	regmatch_t match[2];
 	if (regex.re_nsub && regexec(&regex, str, 2, match, 0) == 0 &&
 			match[1].rm_so != -1) {
 		unsigned long num = strtoul(str + match[1].rm_so, NULL, 0);
-		fprintf(stderr, "%s: %lu player(s) online\n", __func__, num);
+		cmd_printf(CLR_MESSAGE, "%s: %lu player(s) online\n",
+				__func__, num);
 		// Schedule restart when no player online
 		if (num != 0) {
 			monitor_enable(status.mon_logout, 1);
 			return;
 		}
 	} else {
-		fprintf(stderr, "%s: Regex failed\n", __func__);
+		cmd_printf(CLR_ERROR, "%s: Regex failed\n", __func__);
 	}
 	// Restart immediately
 	exec_write_stdin(CMD_SHUTDOWN, ECHO_CMD);

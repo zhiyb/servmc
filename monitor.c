@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <regex.h>
 #include <sys/types.h>
+#include "cmd.h"
 #include "backup.h"
-#include "config.h"
 #include "restart.h"
 #include "monitor.h"
+#include "config.h"
 
 static struct monitor_t {
 	struct monitor_t *next;
@@ -24,7 +25,7 @@ struct monitor_t *monitor_install(const char *regex, monitor_func_t func)
 	// Compile regex
 	regex_t reg;
 	if (regcomp(&reg, regex, REG_EXTENDED | REG_NOSUB | REG_NEWLINE)) {
-		fprintf(stderr, "%s: Cannot compile regex %s\n",
+		cmd_printf(CLR_ERROR, "%s: Cannot compile regex %s\n",
 				__func__, regex);
 		return NULL;
 	}
@@ -78,7 +79,7 @@ void monitor_line(const char *str)
 
 static void server_ready(struct monitor_t *mp, const char *str)
 {
-	fprintf(stderr, "%s: Server ready\n", __func__);
+	cmd_printf(CLR_MESSAGE, "%s: Server ready\n", __func__);
 	status.running = 1;
 }
 

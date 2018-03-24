@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include "monitor.h"
 #include "update.h"
+#include "cmd.h"
 #include "config.h"
 
 #define READ	0
@@ -26,10 +27,11 @@ void exec_write_stdin(const char *str, int echo)
 {
 	if (pid < 0)
 		return;
-	fprintf(fin, "%s\n", str);
+	fputs(str, fin);
+	fputc('\n', fin);
 	fflush(fin);
 	if (echo)
-		printf("%s\n", str);
+		cmd_printf(CLR_ECHO, "%s\n", str);
 }
 
 int exec_rfd(int err)
@@ -52,6 +54,7 @@ static char *exec_read(int err)
 		memcpy(s + len, buf, slen + 1);
 		len += slen;
 	} while (s[len - 1] != '\n');
+	s[len - 1] = 0;
 	return s;
 }
 
@@ -60,7 +63,7 @@ int exec_process(int err)
 	char *str = exec_read(err);
 	if (!str)
 		return EOF;
-	fputs(str, stdout);
+	cmd_printf(err ? CLR_STDERR : CLR_STDOUT, "%s\n", str);
 	monitor_line(str);
 	free(str);
 	return 0;
@@ -70,7 +73,7 @@ int exec_server(const char *dir, const char *jar)
 {
 	if (pid >= 0)
 		return EBUSY;
-	fprintf(stderr, "%s: Starting %s in %s\n", __func__, jar, dir);
+	cmd_printf(CLR_MESSAGE, "%s: Starting %s in %s\n", __func__, jar, dir);
 	monitor_server_start();
 	// Create input/output pipes
 	pipe(fdin);
@@ -107,8 +110,8 @@ int exec_server(const char *dir, const char *jar)
 	if (dir) {
 		int err = chdir(dir);
 		if (err) {
-			fprintf(stderr, "%s: Error changing directory: %s\n",
-					__func__, strerror(errno));
+			cmd_printf(CLR_ERROR, "%s: Error changing directory: "
+					"%s\n", __func__, strerror(errno));
 			exit(0);
 		}
 	}
@@ -120,7 +123,7 @@ void exec_quit()
 {
 	if (pid < 0)
 		return;
-	fprintf(stderr, "%s: Process exit\n", __func__);
+	cmd_printf(CLR_MESSAGE, "%s: Process exited\n", __func__);
 	wait(NULL);
 	pid = -1;
 	fclose(fin);
@@ -132,7 +135,8 @@ void exec_quit()
 
 int exec_backup()
 {
-	fprintf(stderr, "%s: Executing backup commands\n", __func__);
+	cmd_printf(CLR_BACKUP, "%s: Executing backup commands\n", __func__);
+	cmd_external(CLR_EXTERNAL);
 	pid_t pid = fork();
 	if (!pid)
 		execl(EXEC_BACKUP, EXEC_BACKUP,
