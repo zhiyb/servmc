@@ -29,13 +29,16 @@ static void cmd_help()
 		"!help:     This help message\n");
 }
 
-static void cmd_line(char *line)
+void cmd_line(char *line, int echo)
 {
 	static const char *delim = " \n";
 	if (!*line)
 		return;
 	add_history(line);
-	web_message_f(CLR_INPUT, "%s%s\n", INPUT_PROMPT, line);
+	if (echo)
+		cmd_printf(CLR_INPUT, "%s%s\n", INPUT_PROMPT, line);
+	else
+		web_message_f(CLR_INPUT, "%s%s\n", INPUT_PROMPT, line);
 
 	// Send strings to server process
 	if (*line != '!') {
@@ -86,6 +89,11 @@ ret:
 	free(line);
 }
 
+static void cmd_readline(char *line)
+{
+	cmd_line(line, 0);
+}
+
 void cmd_init()
 {
 #if 0
@@ -98,7 +106,7 @@ void cmd_init()
 	// Setup readline
 	//rl_getc_function = getc;
 	rl_callback_handler_install(CLR_INPUT INPUT_PROMPT,
-			(rl_vcpfunc_t *)&cmd_line);
+			(rl_vcpfunc_t *)&cmd_readline);
 	using_history();
 	stifle_history(1000);
 }

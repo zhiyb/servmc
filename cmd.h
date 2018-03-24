@@ -2,6 +2,7 @@
 
 void cmd_init();
 int cmd_rfd();
+void cmd_line(char *line, int echo);
 void cmd_process();
 void cmd_quit();
 int cmd_shutdown();

@@ -9,12 +9,14 @@
 </head>
 <body>
   <h2>Welcome to Minecraft server management - web console</h2>
-  <div id="msgs" style="height:75vh;overflow-y:auto;border-style:solid;border-width:2px;border-color:black"></div>
-</body>
+  <div id="msgs" style="height:75vh;overflow-y:auto;border-style:solid;border-width:2px;border-color:black;margin:6px;font-family:Lucida Console,Courier New"></div>
+  <form id="input" name="input"><span>servmc&gt;</span>
+    <input id="cmd" type="text" style="width:60%">
+    <input id="submit" type="submit" value="Submit">
+  </form>
 <script>
 var msgs = document.getElementById("msgs");
-function append(s)
-{
+function append(s) {
   msgs.insertAdjacentHTML("beforeend", s.replace(/\n/g, "<br>"));
   msgs.scrollTop = msgs.scrollHeight;
 }
@@ -23,5 +25,12 @@ var ws = new WebSocket("ws://" + document.domain + ":" + location.port, "web-con
 ws.onopen = function() {append("WebSocket connected\n");}
 ws.onclose = function() {append("WebSocket disconnected\n");}
 ws.onmessage = function(msg) {append(msg.data);}
+
+document.getElementById("input").addEventListener('submit', function(e) {
+  e.preventDefault();
+  ws.send(document.forms["input"]["cmd"].value);
+  document.forms["input"]["cmd"].value = "";
+});
 </script>
+</body>
 </html>

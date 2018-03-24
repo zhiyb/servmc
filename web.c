@@ -71,6 +71,11 @@ static int web_console(struct lws *wsi, enum lws_callback_reasons reason,
 		web_write_message(wsi);
 		break;
 	case LWS_CALLBACK_RECEIVE:
+		user = malloc(len + 1);
+		memcpy(user, in, len);
+		*((char *)user + len) = 0;
+		cmd_line(user, 1);
+		break;
 	default:
 		break;
 	}
