@@ -118,7 +118,7 @@ void update()
 			__func__, type, ver);
 
 	if (status.version && strcmp(status.version, ver) == 0) {
-		cmd_printf(CLR_UPDATE, "%s: No update\n", __func__);
+		cmd_printf(CLR_UPDATE, "%s: No updates available\n", __func__);
 		goto ret;
 	}
 

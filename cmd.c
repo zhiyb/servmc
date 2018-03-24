@@ -16,6 +16,18 @@
 
 static int shutdown = 0;
 
+static void cmd_help()
+{
+	cmd_external(CLR_EXTERNAL);
+	printf(	"!restart:  Restart the server when no players online\n"
+		"!shutdown: Shutdown the server when no players online\n"
+		"!stop:     Stop the server immediately, then restart\n"
+		"!quit:     Shutdown the server immediately\n"
+		"!update:   Check for server version updates\n"
+		"!backup:   Start a new backup\n"
+		"!help:     This help message\n");
+}
+
 static void cmd_line(char *line)
 {
 	static const char *delim = " \n";
@@ -40,21 +52,29 @@ static void cmd_line(char *line)
 	char *cmd = strtok(line, delim);
 	if (strcmp(cmd, "!restart") == 0) {
 		restart_schedule();
+	} else if (strcmp(cmd, "!shutdown") == 0) {
+		cmd_printf(CLR_MESSAGE, "%s: Scheduled server shutdown\n",
+				__func__);
+		shutdown = 1;
+		restart_schedule();
+	} else if (strcmp(cmd, "!stop") == 0) {
+		if (exec_status() < 0)
+			cmd_printf(CLR_ERROR, "%s: Server is not running\n",
+					__func__);
+		else
+			cmd_printf(CLR_MESSAGE, "%s: Stopping server\n",
+					__func__);
+		exec_stop();
+	} else if (strcmp(cmd, "!quit") == 0) {
+		cmd_printf(CLR_MESSAGE, "%s: Shutting down\n", __func__);
+		shutdown = 1;
+		exec_stop();
 	} else if (strcmp(cmd, "!update") == 0) {
 		update();
 	} else if (strcmp(cmd, "!backup") == 0) {
 		backup_now();
-	} else if (strcmp(cmd, "!stop") == 0) {
-		if (exec_status() >= 0) {
-			cmd_printf(CLR_MESSAGE, "%s: Stopping server\n",
-					__func__);
-			exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
-		}
-	} else if (strcmp(cmd, "!shutdown") == 0) {
-		cmd_printf(CLR_MESSAGE, "%s: Shutting down\n", __func__);
-		shutdown = 1;
-		if (exec_status() >= 0)
-			exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
+	} else if (strcmp(cmd, "!help") == 0) {
+		cmd_help();
 	} else {
 		cmd_printf(CLR_ERROR, "%s: Unknown command: %s\n",
 				__func__, line);

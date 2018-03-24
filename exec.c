@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <errno.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include "cmd.h"
+#include "exec.h"
 #include "monitor.h"
 #include "update.h"
-#include "cmd.h"
 #include "config.h"
 
 #define READ	0
@@ -97,6 +98,8 @@ int exec_server(const char *dir, const char *jar)
 		setlinebuf(fin);
 		setbuf(fout, NULL);
 		setbuf(ferr, NULL);
+		cmd_printf(CLR_MESSAGE, "%s: Process %u started\n",
+				__func__, pid);
 		return 0;
 	}
 
@@ -119,12 +122,28 @@ int exec_server(const char *dir, const char *jar)
 	return 0;
 }
 
+void exec_stop()
+{
+	if (monitor_server_status())
+		exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
+	else
+		exec_kill();
+}
+
+void exec_kill()
+{
+	if (pid < 0)
+		return;
+	kill(pid, SIGTERM);
+	exec_quit();
+}
+
 void exec_quit()
 {
 	if (pid < 0)
 		return;
-	cmd_printf(CLR_MESSAGE, "%s: Process exited\n", __func__);
-	wait(NULL);
+	waitpid(pid, NULL, 0);
+	cmd_printf(CLR_MESSAGE, "%s: Process %u exited\n", __func__, pid);
 	pid = -1;
 	fclose(fin);
 	close(fdin[READ]);

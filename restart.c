@@ -93,13 +93,16 @@ static void restart_list(struct monitor_t *mp, const char *str)
 		cmd_printf(CLR_ERROR, "%s: Regex failed\n", __func__);
 	}
 	// Restart immediately
-	exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
+	exec_stop();
 }
 
 void restart_schedule()
 {
-	if (exec_status() < 0) {
-		restart_now();
+	if (!monitor_server_status()) {
+		if (exec_status() >= 0)
+			exec_stop();
+		else
+			restart_now();
 		return;
 	}
 

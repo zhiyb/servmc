@@ -1,6 +1,8 @@
 #pragma once
 
 int exec_server(const char *dir, const char *jar);
+void exec_stop();
+void exec_kill();
 void exec_quit();
 
 int exec_backup();
