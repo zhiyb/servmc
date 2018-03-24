@@ -40,7 +40,8 @@
 #define CMD_SAVE_DONE	"say §a"
 #define CMD_SAVE_FAIL	"say §c"
 #define CMD_PLAYERS	"list"
-#define CMD_SHUTDOWN	"stop"
+#define CMD_STOP	"stop"
+#define CMD_STOP_MSG	"say §b"
 
 // Coloured outputs
 #define CLR_INPUT	"\33[97m"

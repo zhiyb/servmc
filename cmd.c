@@ -113,8 +113,8 @@ void cmd_process()
 
 void cmd_quit()
 {
-	rl_crlf();
 	rl_callback_handler_remove();
+	cmd_external("");
 }
 
 int cmd_shutdown()

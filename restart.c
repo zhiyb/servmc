@@ -87,6 +87,8 @@ static void restart_list(struct monitor_t *mp, const char *str)
 		// Schedule restart when no player online
 		if (num != 0) {
 			monitor_enable(status.mon_logout, 1);
+			exec_write_stdin(__func__, CMD_STOP_MSG
+					"Server shutdown pending", ECHO_CMD);
 			return;
 		}
 	} else {

@@ -125,7 +125,7 @@ int exec_server(const char *dir, const char *jar)
 void exec_stop()
 {
 	if (monitor_server_status())
-		exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
+		exec_write_stdin(__func__, CMD_STOP, ECHO_CMD);
 	else
 		exec_kill();
 }
