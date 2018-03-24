@@ -6,6 +6,6 @@ void exec_quit();
 int exec_backup();
 
 int exec_status();
-void exec_write_stdin(const char *str, int echo);
+void exec_write_stdin(const char *prompt, const char *str, int echo);
 int exec_rfd(int err);
 int exec_process(int err);

@@ -23,7 +23,7 @@ int exec_status()
 	return pid;
 }
 
-void exec_write_stdin(const char *str, int echo)
+void exec_write_stdin(const char *prompt, const char *str, int echo)
 {
 	if (pid < 0)
 		return;
@@ -31,7 +31,7 @@ void exec_write_stdin(const char *str, int echo)
 	fputc('\n', fin);
 	fflush(fin);
 	if (echo)
-		cmd_printf(CLR_ECHO, "%s\n", str);
+		cmd_printf(CLR_ECHO, "%s: %s\n", prompt, str);
 }
 
 int exec_rfd(int err)

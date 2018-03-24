@@ -63,7 +63,7 @@ static void restart_logout(struct monitor_t *mp, const char *str)
 	// Disable callback
 	monitor_enable(status.mon_logout, 0);
 	// Check number of online players again
-	exec_write_stdin(CMD_PLAYERS, ECHO_CMD);
+	exec_write_stdin(__func__, CMD_PLAYERS, ECHO_CMD);
 	monitor_enable(status.mon_list, 1);
 }
 
@@ -93,7 +93,7 @@ static void restart_list(struct monitor_t *mp, const char *str)
 		cmd_printf(CLR_ERROR, "%s: Regex failed\n", __func__);
 	}
 	// Restart immediately
-	exec_write_stdin(CMD_SHUTDOWN, ECHO_CMD);
+	exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
 }
 
 void restart_schedule()
@@ -110,6 +110,6 @@ void restart_schedule()
 	if (!status.mon_list)
 		status.mon_list = monitor_install(REGEX_PLAYERS, restart_list);
 	// Check number of online players
-	exec_write_stdin(CMD_PLAYERS, ECHO_CMD);
+	exec_write_stdin(__func__, CMD_PLAYERS, ECHO_CMD);
 	monitor_enable(status.mon_list, 1);
 }

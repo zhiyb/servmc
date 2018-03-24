@@ -32,7 +32,7 @@ static void cmd_line(char *line)
 			cmd_printf(CLR_ERROR, "%s: Server is not ready for "
 					"accepting commands\n", __func__);
 		else
-			exec_write_stdin(line, 0);
+			exec_write_stdin(__func__, line, 0);
 		goto ret;
 	}
 
@@ -48,13 +48,13 @@ static void cmd_line(char *line)
 		if (exec_status() >= 0) {
 			cmd_printf(CLR_MESSAGE, "%s: Stopping server\n",
 					__func__);
-			exec_write_stdin(CMD_SHUTDOWN, ECHO_CMD);
+			exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
 		}
 	} else if (strcmp(cmd, "!shutdown") == 0) {
 		cmd_printf(CLR_MESSAGE, "%s: Shutting down\n", __func__);
 		shutdown = 1;
 		if (exec_status() >= 0)
-			exec_write_stdin(CMD_SHUTDOWN, ECHO_CMD);
+			exec_write_stdin(__func__, CMD_SHUTDOWN, ECHO_CMD);
 	} else {
 		cmd_printf(CLR_ERROR, "%s: Unknown command: %s\n",
 				__func__, line);
