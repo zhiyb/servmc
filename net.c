@@ -126,6 +126,7 @@ dl:	cmd_printf(CLR_MESSAGE, "%s: Downloading %s to %s (sha1sum: %s)\n",
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
+	cmd_external(CLR_EXTERNAL);
 	res = curl_easy_perform(curl);
 	curl_easy_cleanup(curl);
 	fclose(fp);
