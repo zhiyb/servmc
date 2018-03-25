@@ -160,6 +160,8 @@ void web_message_f(const char *colour, const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 	int ret = vsnprintf(NULL, 0, fmt, args);
+	va_end(args);
+	va_start(args, fmt);
 	web_message(colour, ret + 1, fmt, args);
 	va_end(args);
 }

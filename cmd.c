@@ -145,6 +145,8 @@ int cmd_printf(const char *colour, const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 	int ret = vprintf(fmt, args);
+	va_end(args);
+	va_start(args, fmt);
 	web_message(colour, ret + 1, fmt, args);
 	va_end(args);
 	if (!RL_ISSTATE(RL_STATE_DONE))
