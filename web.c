@@ -65,10 +65,12 @@ static int web_console(struct lws *wsi, enum lws_callback_reasons reason,
 		if (client)
 			lws_callback_on_writable(client);
 		client = wsi;
+		cmd_printf(CLR_WEB, "%s: WS %p connected\n", __func__, wsi);
 		break;
 	case LWS_CALLBACK_CLOSED:
 		if (client == wsi)
 			client = NULL;
+		cmd_printf(CLR_WEB, "%s: WS %p disconnected\n", __func__, wsi);
 		break;
 	case LWS_CALLBACK_SERVER_WRITEABLE:
 		if (client != wsi)
@@ -146,8 +148,10 @@ void web_message(const char *colour, size_t size, const char *fmt, va_list ap)
 	struct message_t *m = malloc(sizeof(struct message_t));
 	m->next = NULL;
 	m->colour = colour;
-	m->msg = malloc(size + LWS_PRE);
-	m->size = vsnprintf(m->msg + LWS_PRE, size, fmt, ap) + 1;
+	size_t clen = strlen(colour);
+	m->msg = malloc(size + LWS_PRE + clen);
+	strcpy(m->msg + LWS_PRE, colour);
+	m->size = vsnprintf(m->msg + LWS_PRE + clen, size, fmt, ap) + clen + 1;
 	web_enqueue(m);
 }
 

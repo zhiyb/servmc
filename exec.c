@@ -28,8 +28,8 @@ void exec_write_stdin(const char *prompt, const char *str, int echo)
 {
 	if (pid < 0)
 		return;
-	fputs(str, fin);
-	fputc('\n', fin);
+	// Thread-safe?
+	fprintf(fin, "%s\n", str);
 	fflush(fin);
 	if (echo)
 		cmd_printf(CLR_ECHO, "%s: %s\n", prompt, str);
