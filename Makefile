@@ -10,7 +10,7 @@ LDFLAGS	= -Wall -Werror -O2
 LIBS	:= $(shell curl-config --libs)
 LIBS	+= $(shell pkg-config --libs json-c)
 LIBS	+= $(shell pkg-config --libs libwebsockets)
-LIBS	+= -lreadline -lpthread
+LIBS	+= -lreadline -lmagic -lpthread
 
 .PHONY: all
 all: $(TRG)

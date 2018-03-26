@@ -1,3 +1,4 @@
+#include <magic.h>
 #include <pthread.h>
 #include <libwebsockets.h>
 #include "cmd.h"
@@ -30,19 +31,46 @@ static struct lws_protocols protocols[] = {
 	{NULL, NULL, 0, 0}	// Terminator
 };
 
+static const char *web_file_ext(const char *path)
+{
+	const char *dot = strrchr(path, '.');
+	if (!dot || dot == path)
+		return "";
+	return dot + 1;
+}
+
 static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		void *user, void *in, size_t len)
 {
 	static const size_t flen = strlen(WEB_PATH);
+	static magic_t magic = NULL;
+	if (!magic) {
+		magic = magic_open(MAGIC_MIME_TYPE);
+		magic_load(magic, NULL);
+		magic_compile(magic, NULL);
+		//magic_close(magic);
+	}
 	if (reason == LWS_CALLBACK_HTTP) {
-		char *url = in;
+		const char *url = in;
 		char path[flen + len + 2 + 10];
 		// TODO: URL validation
 		snprintf(path, sizeof(path), WEB_PATH "%s%s", url,
 				url[len - 1] == '/' ? "index.html" : "");
-		cmd_printf(CLR_WEB, "%s: HTTP request: %s (%s)\n",
-				__func__, url, path);
-		lws_serve_http_file(wsi, path, "text/html", NULL, 0);
+		// Check file MIME type
+		const char *ext = web_file_ext(path);
+		const char *type = NULL;
+		if (strcmp(ext, "html") == 0)
+			type = "text/html";
+		else if (strcmp(ext, "js") == 0)
+			type = "application/javascript";
+		else if (strcmp(ext, "css") == 0)
+			type = "text/css";
+		else
+			type = magic_file(magic, path);
+		// Send file
+		cmd_printf(CLR_WEB, "%s: HTTP request: %s (%s: %s)\n",
+				__func__, url, type, path);
+		lws_serve_http_file(wsi, path, type, NULL, 0);
 		return 1;
 	}
 	return 0;
