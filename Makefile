@@ -2,15 +2,15 @@ SRCS	= main.c exec.c cmd.c net.c update.c monitor.c backup.c restart.c web.c
 TRG	= servmc
 
 OBJS	= $(SRCS:.c=.o)
-CFLAGS	:= -Wall -Werror -O2
-CFLAGS	+= $(shell curl-config --cflags)
-CFLAGS	+= $(shell pkg-config --cflags json-c)
-CFLAGS	+= $(shell pkg-config --cflags libwebsockets)
+override	CFLAGS	+= -Wall -Werror -O2
+override	CFLAGS	+= $(shell curl-config --cflags)
+override	CFLAGS	+= $(shell pkg-config --cflags json-c)
+override	CFLAGS	+= $(shell pkg-config --cflags libwebsockets)
 LDFLAGS	= -Wall -Werror -O2
-LIBS	:= $(shell curl-config --libs)
-LIBS	+= $(shell pkg-config --libs json-c)
-LIBS	+= $(shell pkg-config --libs libwebsockets)
-LIBS	+= -lreadline -lpthread
+override	LIBS	+= $(shell curl-config --libs)
+override	LIBS	+= $(shell pkg-config --libs json-c)
+override	LIBS	+= $(shell pkg-config --libs libwebsockets)
+override	LIBS	+= -lreadline -lpthread
 
 .PHONY: all
 all: $(TRG)
