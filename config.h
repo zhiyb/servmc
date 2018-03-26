@@ -15,6 +15,7 @@
 
 // File paths and URLs
 #define SERVER_PATH	"server"
+#define WEB_PATH	"www"
 #define MANIFEST_URL	"https://launchermeta.mojang.com/mc/game/version_manifest.json"
 
 // Programs and arguments

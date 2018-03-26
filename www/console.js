@@ -1,21 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Minecraft server management - web console</title>
-</head>
-<body style="background-color:black;color:#bbbbbb">
-  <h2>Welcome to Minecraft server management - web console</h2>
-  <div id="msgs" style="height:60vh;overflow-y:auto;border-style:solid;border-width:2px;border-color:#66ccff;margin:6px;font-family:Lucida Console,Courier New;white-space:nowrap"></div>
-  <form id="input" name="input">
-    <span style="font-family:Lucida Console,Courier New;color:#ffffff">servmc&gt;</span>
-    <input id="cmd" type="text" style="width:55%;background-color:inherit;color:#ffffff">
-    <input id="submit" type="submit" value="Submit">
-  </form>
-<script>
 function colourd(s) {
   var bold = false, colour = null;
   s = s.replace(/\033\[([0-9;]+)m/g, function(esc, clr) {
@@ -73,6 +55,3 @@ document.getElementById("input").addEventListener('submit', function(e) {
   ws.send(document.forms["input"]["cmd"].value);
   document.forms["input"]["cmd"].value = "";
 });
-</script>
-</body>
-</html>
