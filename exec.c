@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/types.h>
+#include <signal.h>
 #include <sys/wait.h>
 #include "cmd.h"
 #include "exec.h"
