@@ -10,12 +10,12 @@ body {
   border-width: 2px;
   border-color: #66ccff;
   margin: 6px;
-  font-family: "Lucida Console,Courier New";
+  font-family: Lucida Console,Courier New;
   white-space: nowrap;
 }
 
 #prompt {
-  font-family: "Lucida Console,Courier New";
+  font-family: Lucida Console,Courier New;
   color: #ffffff;
 }
 

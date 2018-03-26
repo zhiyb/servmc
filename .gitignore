@@ -2,6 +2,7 @@ servmc
 server/
 *.o
 *.d
+*.mgc
 
 #MacOS
 .DS_Store
