@@ -71,7 +71,6 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		cmd_printf(CLR_WEB, "%s: HTTP request: %s (%s: %s)\n",
 				__func__, url, type, path);
 		lws_serve_http_file(wsi, path, type, NULL, 0);
-		return 1;
 	}
 	return 0;
 }
