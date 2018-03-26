@@ -33,8 +33,18 @@ static struct lws_protocols protocols[] = {
 static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		void *user, void *in, size_t len)
 {
-	if (reason == LWS_CALLBACK_HTTP)
-		lws_serve_http_file(wsi, "web.html", "text/html", NULL, 0);
+	static const size_t flen = strlen(WEB_PATH);
+	if (reason == LWS_CALLBACK_HTTP) {
+		char *url = in;
+		char path[flen + len + 2 + 10];
+		// TODO: URL validation
+		snprintf(path, sizeof(path), WEB_PATH "%s%s", url,
+				url[len - 1] == '/' ? "index.html" : "");
+		cmd_printf(CLR_WEB, "%s: HTTP request: %s (%s)\n",
+				__func__, url, path);
+		lws_serve_http_file(wsi, path, "text/html", NULL, 0);
+		return 1;
+	}
 	return 0;
 }
 
