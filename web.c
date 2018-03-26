@@ -10,6 +10,8 @@ static pthread_t thread;
 static pthread_mutex_t msgs_mutex;
 static struct lws_context *lws_ctx = NULL;
 static struct lws * volatile client = NULL;
+static magic_t magic = NULL;
+static char *http_path = NULL;
 static int quit = 0;
 static struct message_t {
 	struct message_t * volatile next;
@@ -43,21 +45,14 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		void *user, void *in, size_t len)
 {
 	static const size_t flen = strlen(WEB_PATH);
-	static magic_t magic = NULL;
-	if (!magic) {
-		magic = magic_open(MAGIC_MIME_TYPE);
-		magic_load(magic, NULL);
-		magic_compile(magic, NULL);
-		//magic_close(magic);
-	}
 	if (reason == LWS_CALLBACK_HTTP) {
 		const char *url = in;
-		char path[flen + len + 2 + 10];
+		http_path = realloc(http_path, flen + len + 2 + 10);
 		// TODO: URL validation
-		snprintf(path, sizeof(path), WEB_PATH "%s%s", url,
+		sprintf(http_path, WEB_PATH "%s%s", url,
 				url[len - 1] == '/' ? "index.html" : "");
 		// Check file MIME type
-		const char *ext = web_file_ext(path);
+		const char *ext = web_file_ext(http_path);
 		const char *type = NULL;
 		if (strcmp(ext, "html") == 0)
 			type = "text/html";
@@ -66,11 +61,15 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		else if (strcmp(ext, "css") == 0)
 			type = "text/css";
 		else
-			type = magic_file(magic, path);
+			type = magic_file(magic, http_path);
 		// Send file
 		cmd_printf(CLR_WEB, "%s: HTTP request: %s (%s: %s)\n",
-				__func__, url, type, path);
-		lws_serve_http_file(wsi, path, type, NULL, 0);
+				__func__, url, type, http_path);
+		if (lws_serve_http_file(wsi, http_path, type, NULL, 0) < 0)
+			return -1;
+	} else if (reason == LWS_CALLBACK_HTTP_FILE_COMPLETION) {
+		if (lws_http_transaction_completed(wsi))
+			return -1;
 	}
 	return 0;
 }
@@ -145,6 +144,10 @@ static void web_log(int level, const char *line)
 
 void web_init()
 {
+	magic = magic_open(MAGIC_MIME_TYPE);
+	magic_load(magic, NULL);
+	magic_compile(magic, NULL);
+
 	struct lws_context_creation_info info = {
 		.port = WEB_PORT,
 		.protocols = protocols,
@@ -152,6 +155,7 @@ void web_init()
 	};
 	lws_set_log_level(7, web_log);
 	lws_ctx = lws_create_context(&info);
+
 	quit = 0;
 	pthread_mutex_init(&msgs_mutex, NULL);
 	pthread_create(&thread, NULL, web_thread, NULL);
@@ -162,10 +166,15 @@ void web_quit()
 	quit = 1;
 	lws_cancel_service(lws_ctx);
 	pthread_join(thread, NULL);
+
 	lws_context_destroy(lws_ctx);
 	lws_ctx = NULL;
 	client = NULL;
 	pthread_mutex_destroy(&msgs_mutex);
+
+	magic_close(magic);
+	free(http_path);
+	http_path = NULL;
 }
 
 static void web_enqueue(struct message_t *m)
