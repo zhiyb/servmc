@@ -13,8 +13,13 @@ import IconButton from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import IconDashboard from 'material-ui-icons/Dashboard';
+import IconServer from 'material-ui-icons/Dns';
 import IconConsole from 'material-ui-icons/CallToAction';
-import IconServerStatus from 'material-ui-icons/Dns';
+import IconCode from 'material-ui-icons/Code';
+// import pageDashboard from './pages/dashboard';
+// import pageServer from './pages/server';
+// import pageConsole from './pages/console';
 
 import './App.css';
 
@@ -85,8 +90,30 @@ const styles = theme => ({
 });
 
 class App extends Component {
+  pages = [
+    {
+      name: "dashboard",
+      title: "仪表盘",
+      icon: <IconDashboard />,
+      body: <pageDashboard />,
+    },
+    {
+      name: "server",
+      title: "服务器控制",
+      icon: <IconServer />,
+      body: <pageServer />,
+    },
+    {
+      name: "console",
+      title: "控制台",
+      icon: <IconConsole />,
+      body: <pageConsole />,
+    },
+  ]
+
   state = {
     open: false,
+    page: this.pages[0],
   };
 
   handleDrawerOpen = () => {
@@ -134,26 +161,31 @@ class App extends Component {
           </div>
           <Divider />
           <List>
-            <ListItem button>
-              <ListItemIcon>
-                <IconServerStatus />
-              </ListItemIcon>
-              <ListItemText primary="服务器状态" />
-            </ListItem>
+            {this.pages.map((item) => {
+              return (
+                <ListItem button onClick={() => { this.setState({ page: item }) }}>
+                  <ListItemIcon>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText primary={item.title} />
+                </ListItem>
+              );
+            })}
           </List>
           <Divider />
           <List>
-            <ListItem button>
+            <ListItem button onClick={() => { window.open("https://github.com/zhiyb/servmc/") }}>
               <ListItemIcon>
-                <IconConsole />
+                <IconCode />
               </ListItemIcon>
-              <ListItemText primary="控制台" />
+              <ListItemText primary="访问ServMC项目" />
             </ListItem>
           </List>
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          <Typography noWrap>Body</Typography>
+          {this.state.page.name}
+          {this.state.page.body}
         </main>
       </div>
     );
