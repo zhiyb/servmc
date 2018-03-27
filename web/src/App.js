@@ -13,7 +13,8 @@ import IconButton from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import StarIcon from 'material-ui-icons/Star';
+import IconConsole from 'material-ui-icons/CallToAction';
+import IconServerStatus from 'material-ui-icons/Dns';
 
 import './App.css';
 
@@ -115,7 +116,7 @@ class App extends Component {
               <MenuIcon />
             </IconButton>
             <Typography variant="title" color="inherit" noWrap>
-              Servmc控制台
+              ServMC控制台
             </Typography>
           </Toolbar>
         </AppBar>
@@ -135,22 +136,16 @@ class App extends Component {
           <List>
             <ListItem button>
               <ListItemIcon>
-                <StarIcon />
+                <IconServerStatus />
               </ListItemIcon>
               <ListItemText primary="服务器状态" />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <StarIcon />
-              </ListItemIcon>
-              <ListItemText primary="服务器控制" />
             </ListItem>
           </List>
           <Divider />
           <List>
             <ListItem button>
               <ListItemIcon>
-              <StarIcon />
+                <IconConsole />
               </ListItemIcon>
               <ListItemText primary="控制台" />
             </ListItem>
