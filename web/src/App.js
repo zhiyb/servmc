@@ -17,9 +17,9 @@ import IconDashboard from 'material-ui-icons/Dashboard';
 import IconServer from 'material-ui-icons/Dns';
 import IconConsole from 'material-ui-icons/CallToAction';
 import IconCode from 'material-ui-icons/Code';
-// import pageDashboard from './pages/dashboard';
-// import pageServer from './pages/server';
-// import pageConsole from './pages/console';
+import PageDashboard from './pages/dashboard';
+import PageServer from './pages/server';
+import PageConsole from './pages/console';
 
 import './App.css';
 
@@ -89,31 +89,31 @@ const styles = theme => ({
   },
 });
 
-class App extends Component {
-  pages = [
-    {
-      name: "dashboard",
-      title: "仪表盘",
-      icon: <IconDashboard />,
-      body: <pageDashboard />,
-    },
-    {
-      name: "server",
-      title: "服务器控制",
-      icon: <IconServer />,
-      body: <pageServer />,
-    },
-    {
-      name: "console",
-      title: "控制台",
-      icon: <IconConsole />,
-      body: <pageConsole />,
-    },
-  ]
+const pages = [
+  {
+    name: "dashboard",
+    title: "仪表盘",
+    icon: <IconDashboard />,
+    body: <PageDashboard />,
+  },
+  {
+    name: "server",
+    title: "服务器控制",
+    icon: <IconServer />,
+    body: <PageServer />,
+  },
+  {
+    name: "console",
+    title: "控制台",
+    icon: <IconConsole />,
+    body: <PageConsole />,
+  },
+]
 
+class App extends Component {
   state = {
     open: false,
-    page: this.pages[0],
+    page: pages[0],
   };
 
   handleDrawerOpen = () => {
@@ -161,7 +161,7 @@ class App extends Component {
           </div>
           <Divider />
           <List>
-            {this.pages.map((item) => {
+            {pages.map((item) => {
               return (
                 <ListItem button onClick={() => { this.setState({ page: item }) }}>
                   <ListItemIcon>
@@ -184,7 +184,6 @@ class App extends Component {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          {this.state.page.name}
           {this.state.page.body}
         </main>
       </div>
