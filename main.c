@@ -14,14 +14,16 @@
 #include "exec.h"
 #include "backup.h"
 #include "update.h"
-#include "config.h"
+#include "monitor.h"
 #include "restart.h"
+#include "config.h"
 
 int main(int argc, char *argv[])
 {
 	fd_set rfds;
 	cmd_init();
 	net_init();
+	mon_init();
 
 	// Initial steps
 	update();
@@ -71,6 +73,7 @@ loop:	// Setup file descriptors
 quit:
 	exec_quit();
 	web_quit();
+	mon_deinit();
 	cmd_quit();
 	return 0;
 }

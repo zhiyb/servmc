@@ -1,5 +1,6 @@
 OBJS	:= main.o exec.o cmd.o net.o update.o monitor.o backup.o restart.o
 OBJS	+= web.o query.o
+OBJS	+= $(subst .c,.o,$(wildcard mon/*.c))
 TRG		= servmc
 
 override	CFLAGS	+= -Wall -Werror -O2

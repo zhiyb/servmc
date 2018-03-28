@@ -37,17 +37,20 @@ struct json_object *query_json(struct json_object *qobj)
 {
 	if (!json_object_is_type(qobj, json_type_object))
 		return NULL;
+
 	int op_set = 0;
 	struct json_object *set;
 	if (json_object_object_get_ex(qobj, "set", &set) &&
 			json_object_get_boolean(set))
 		op_set = 1;
+
 	const char *op_type = NULL;
 	struct json_object *type;
 	if (json_object_object_get_ex(qobj, "type", &type))
 		op_type = json_object_get_string(type);
 	if (!op_type)
 		return NULL;
+
 	if (op_set)
 		return query_set(qobj, op_type);
 	return query_get(qobj, op_type);
