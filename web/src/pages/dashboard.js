@@ -37,17 +37,22 @@ class dashboard extends Component {
 		players: undefined,
 	};
 
-	update = () =>{
+	update = () => {
 		query({ "action": "query", "type": "version" }).then((ret) => {
 			this.setState({ version: ret })
 		});
 		query({ "action": "query", "type": "players" }).then((ret) => {
 			this.setState({ players: ret })
 		});
+		this.updateTimer = setTimeout(this.update, 3000);
 	}
 
 	componentDidMount() {
 		this.update();
+	}
+
+	componentWillUnmount() {
+		this.updateTimer && clearTimeout(this.updateTimer)
 	}
 
 	render() {
@@ -114,9 +119,9 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										在线人数
 									</Typography>
-									<CircularProgress className={classes.progress} variant="static" value={this.state.players?this.state.players.online/this.state.players.max*100:100} size={80} />
+									<CircularProgress className={classes.progress} variant="static" max={this.state.players ? this.state.players.max : 1} value={this.state.players ? this.state.players.online : 1} size={80} />
 									<Typography variant="headline" component="h2">
-									{this.state.players ? this.state.players.online : "?"}/{this.state.players ? this.state.players.max : "?"}
+										{this.state.players ? this.state.players.online : "?"}/{this.state.players ? this.state.players.max : "?"}
 									</Typography>
 								</Paper>
 							</Grid>
