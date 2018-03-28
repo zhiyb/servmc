@@ -92,7 +92,7 @@ class console extends Component {
 		if (process.env.NODE_ENV === 'development')
 			url = "ws://localhost:25580";
 		else
-			url = "ws://" + this.props.location.hostname + ":" + this.props.location.port;
+			url = "ws://" + window.location.hostname + ":" + window.location.port;
 		this.ws = new WebSocket(url, "web-console");
 		this.ws.onopen = function () { append("WebSocket connected\n"); }
 		this.ws.onclose = function () { append("WebSocket disconnected\n"); }
