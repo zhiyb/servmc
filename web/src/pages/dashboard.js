@@ -21,6 +21,10 @@ const styles = theme => ({
 		padding: theme.spacing.unit * 2,
 		color: theme.palette.text.secondary,
 	},
+	progressbg: {
+		margin: theme.spacing.unit * 2,
+		position: "absolute",
+	},
 	progress: {
 		margin: theme.spacing.unit * 2,
 	},
@@ -33,13 +37,26 @@ const styles = theme => ({
 class dashboard extends Component {
 
 	state = {
-		version: null,
+		version: undefined,
+		players: undefined,
 	};
 
+	update = () => {
+		query({ "action": "query", "type": "version" }).then((ret) => {
+			this.setState({ version: ret })
+		});
+		query({ "action": "query", "type": "players" }).then((ret) => {
+			this.setState({ players: ret })
+		});
+		this.updateTimer = setTimeout(this.update, 3000);
+	}
+
 	componentDidMount() {
-		query({"type":"version"}).then((ret) => {
-			this.setState({version: ret})
-		})
+		this.update();
+	}
+
+	componentWillUnmount() {
+		this.updateTimer && clearTimeout(this.updateTimer)
 	}
 
 	render() {
@@ -62,9 +79,9 @@ class dashboard extends Component {
 									</Typography>
 									<pre>
 										10:01:00 YJBeetle 加入游戏
-										<br/>
+										<br />
 										10:02:02 YJBeetle 离开游戏
-										<br/>
+										<br />
 										10:10:35 zhiyb 离开游戏
 									</pre>
 								</Paper>
@@ -76,9 +93,9 @@ class dashboard extends Component {
 									</Typography>
 									<pre>
 										10:01:34 zhiyb: test msg
-										<br/>
+										<br />
 										10:01:42 YJBeetle: test msg
-										<br/>
+										<br />
 										10:01:56 YJBeetle: test msg
 									</pre>
 								</Paper>
@@ -106,9 +123,10 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										在线人数
 									</Typography>
-									<CircularProgress className={classes.progress} variant="static" value={19} size={80} />
+									<CircularProgress className={classes.progressbg} variant="static" color="inherit" value="100" size={80} />
+									<CircularProgress className={classes.progress} variant="static" max={this.state.players ? this.state.players.max : 1} value={this.state.players ? this.state.players.online : 1} size={80} />
 									<Typography variant="headline" component="h2">
-										30/160
+										{this.state.players ? this.state.players.online : "?"}/{this.state.players ? this.state.players.max : "?"}
 									</Typography>
 								</Paper>
 							</Grid>
@@ -118,7 +136,7 @@ class dashboard extends Component {
 										备份状态
 									</Typography>
 									<Typography variant="headline" component="h2">
-										最后备份于<br/>xxxx
+										最后备份于<br />xxxx
 									</Typography>
 								</Paper>
 							</Grid>
@@ -128,7 +146,7 @@ class dashboard extends Component {
 										游戏版本
 									</Typography>
 									<Typography variant="headline" component="h2">
-										{this.state.version?this.state.version:"查询中……"}
+										{this.state.version ? this.state.version : "查询中……"}
 									</Typography>
 								</Paper>
 							</Grid>
@@ -153,11 +171,12 @@ class dashboard extends Component {
 							<Grid item>
 								<Paper className={classes.paper}>
 									<Typography className={classes.title} color="textSecondary">
-									内存使用率
+										内存使用率
 									</Typography>
+									<CircularProgress className={classes.progressbg} variant="static" color="inherit" value="100" size={80} />
 									<CircularProgress className={classes.progress} variant="static" value={67} size={80} />
 									<Typography variant="headline" component="h2">
-									67%
+										67%
 									</Typography>
 								</Paper>
 							</Grid>
@@ -166,9 +185,10 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										CPU使用率
 									</Typography>
+									<CircularProgress className={classes.progressbg} variant="static" color="inherit" value="100" size={80} />
 									<CircularProgress className={classes.progress} variant="static" value={75} size={80} />
 									<Typography variant="headline" component="h2">
-									75%
+										75%
 									</Typography>
 								</Paper>
 							</Grid>
@@ -179,6 +199,16 @@ class dashboard extends Component {
 									</Typography>
 									<Typography variant="headline" component="h2">
 										1.1  1.3  1.71
+									</Typography>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper}>
+									<Typography className={classes.title} color="textSecondary">
+										开机时间
+									</Typography>
+									<Typography variant="headline" component="h2">
+										1d 2h 36min
 									</Typography>
 								</Paper>
 							</Grid>

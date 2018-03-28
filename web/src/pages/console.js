@@ -34,6 +34,9 @@ class console extends Component {
 	msgsScroll = null;
 	ws = null;
 
+	commands = [];	//历史命令记录
+	commandsNow = null;
+
 	msgsAppend = str => {
 		if (this.msgs) this.msgs.insertAdjacentHTML("beforeend", this.colourd(str).replace(/\n/g, "<br>"));
 		if (this.msgsScroll) this.msgsScroll.scrollTop = this.msgsScroll.scrollHeight;
@@ -115,10 +118,27 @@ class console extends Component {
 					<InputLabel htmlFor="command">servmc></InputLabel>
 					<Input
 						id="command"
-						onKeyUp={event => {
+						onKeyDown={event => {
 							if (event.keyCode === 13) {
+								event.preventDefault();
 								if (this.ws) this.ws.send(event.target.value);
+								this.commands.push(event.target.value);
+								this.commandsNow = null;
 								event.target.value = "";	//清空文本框
+							}
+							if (event.keyCode === 38) {
+								event.preventDefault();
+								if (this.commands.length) {
+									this.commandsNow = this.commandsNow === null ? this.commands.length - 1 : this.commandsNow - 1 < 0 ? this.commandsNow : this.commandsNow - 1;
+									event.target.value = this.commands[this.commandsNow];
+								}
+							}
+							if (event.keyCode === 40) {
+								event.preventDefault();
+								if (this.commands.length) {
+									this.commandsNow = this.commandsNow === null ? null : this.commandsNow + 1 >= this.commands.length ? null : this.commandsNow + 1;
+									event.target.value = this.commandsNow === null ? "" : this.commands[this.commandsNow];
+								}
 							}
 						}}
 					/>
