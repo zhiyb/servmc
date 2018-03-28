@@ -11,9 +11,7 @@ import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
 import IconButton from 'material-ui/IconButton';
 import Menu, { MenuItem } from 'material-ui/Menu';
-import { CircularProgress } from 'material-ui/Progress';
 import IconAccount from 'material-ui-icons/AccountCircle';
-
 import MenuIcon from 'material-ui-icons/Menu';
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
@@ -161,14 +159,14 @@ class App extends Component {
             <Typography variant="title" color="inherit" noWrap className={classes.flex}>
               ServMC - {this.state.page.title}
             </Typography>
-              <IconButton
-                aria-owns={Boolean(this.state.anchorEl) ? 'menu-appbar' : null}
-                aria-haspopup="true"
-                onClick={this.handleConnectionMenu}
-                color="inherit"
-              >
-                <IconAccount />
-              </IconButton>
+            <IconButton
+              aria-owns={Boolean(this.state.anchorEl) ? 'menu-appbar' : null}
+              aria-haspopup="true"
+              onClick={this.handleConnectionMenu}
+              color="inherit"
+            >
+              <IconAccount />
+            </IconButton>
             <Menu
               id="menu-appbar"
               anchorEl={this.state.anchorEl}
@@ -183,10 +181,10 @@ class App extends Component {
               open={Boolean(this.state.anchorEl)}
               onClose={this.handleConnectionMenuClose}
             >
-              <MenuItem onClick={()=>{
+              <MenuItem onClick={() => {
                 this.handleConnectionMenuClose()
               }}>……</MenuItem>
-              <MenuItem onClick={()=>{
+              <MenuItem onClick={() => {
                 this.handleConnectionMenuClose()
               }}>……</MenuItem>
             </Menu>
@@ -206,9 +204,9 @@ class App extends Component {
           </div>
           <Divider />
           <List>
-            {pages.map((item) => {
+            {pages.map((item, index) => {
               return (
-                <ListItem button onClick={() => { this.setState({ page: item }) }}>
+                <ListItem key={index} button onClick={() => { this.setState({ page: item }) }}>
                   <ListItemIcon>
                     {item.icon}
                   </ListItemIcon>
