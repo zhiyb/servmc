@@ -4,7 +4,6 @@
 #include <regex.h>
 #include <sys/types.h>
 #include "cmd.h"
-#include "backup.h"
 #include "restart.h"
 #include "monitor.h"
 #include "config.h"
@@ -24,9 +23,11 @@ static struct {
 } status = {NULL, 0};
 
 extern struct mon_module_t mon_players;
+extern struct mon_module_t mon_backup;
 
 static struct mon_module_t *modules[] = {
 	&mon_players,
+	&mon_backup,
 };
 
 struct monitor_t *monitor_install(const char *regex, monitor_func_t func)
@@ -108,7 +109,6 @@ void monitor_server_start()
 	if (!status.mon_server)
 		status.mon_server = monitor_install(REGEX_READY, server_ready);
 	monitor_enable(status.mon_server, 1);
-	backup_start();
 }
 
 void monitor_server_stop()
@@ -120,12 +120,11 @@ void monitor_server_stop()
 			modules[i]->stop();
 	for (int i = 0; i != ARRAY_SIZE(modules); i++) {
 		struct mon_monitor_t *mmp = modules[i]->monitors;
-		while (mmp->func) {
+		while (mmp && mmp->func) {
 			monitor_enable(mmp->mon, 0);
 			mmp++;
 		}
 	}
-	backup_stop();
 	restart();
 }
 
@@ -133,7 +132,7 @@ void mon_init()
 {
 	for (int i = 0; i != ARRAY_SIZE(modules); i++) {
 		struct mon_monitor_t *mmp = modules[i]->monitors;
-		while (mmp->func) {
+		while (mmp && mmp->func) {
 			mmp->mon = monitor_install(mmp->regex, mmp->func);
 			mmp++;
 		}
@@ -144,7 +143,7 @@ void mon_deinit()
 {
 	for (int i = 0; i != ARRAY_SIZE(modules); i++) {
 		struct mon_monitor_t *mmp = modules[i]->monitors;
-		while (mmp->func) {
+		while (mmp && mmp->func) {
 			monitor_uninstall(&mmp->mon);
 			mmp++;
 		}

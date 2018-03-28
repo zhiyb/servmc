@@ -12,11 +12,18 @@
 #include "net.h"
 #include "web.h"
 #include "exec.h"
-#include "backup.h"
 #include "update.h"
 #include "monitor.h"
 #include "restart.h"
 #include "config.h"
+#include "mon/backup.h"
+
+void tick()
+{
+	backup_tick(NULL);
+	update_tick();
+	restart_tick();
+}
 
 int main(int argc, char *argv[])
 {
@@ -51,9 +58,7 @@ loop:	// Setup file descriptors
 		goto quit;
 	} else if (ret == 0) {
 		// Timeout, evaluate event tick
-		backup_tick();
-		update_tick();
-		restart_tick();
+		tick();
 		goto loop;
 	}
 	if (FD_ISSET(cmd_rfd(), &rfds))

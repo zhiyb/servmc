@@ -6,6 +6,7 @@
 #include "../exec.h"
 #include "../monitor.h"
 #include "../config.h"
+#include "backup.h"
 
 struct player_t {
 	struct player_t *next;
@@ -16,6 +17,16 @@ static struct {
 	int cnt, max;
 	struct player_t *player;
 } data = {0, 0, NULL};
+
+int players_online()
+{
+	return data.cnt;
+}
+
+static void player_triggers()
+{
+	backup_players(data.cnt);
+}
 
 static struct player_t **players_find(const char *name)
 {
@@ -51,11 +62,12 @@ static void players_login(struct monitor_t *mp, const char *str)
 	if (*players_find(pp->name)) {
 		// Player already exists in the registry
 		free(pp);
-		return;
+	} else {
+		pp->next = data.player;
+		data.player = pp;
 	}
 
-	pp->next = data.player;
-	data.player = pp;
+	player_triggers();
 }
 
 static void players_logout(struct monitor_t *mp, const char *str)
@@ -86,12 +98,13 @@ static void players_logout(struct monitor_t *mp, const char *str)
 	if (!*ppp) {
 		cmd_printf(CLR_ERROR, "%s: Player %s not found in registry\n",
 				__func__, name);
-		return;
+	} else {
+		void *p = *ppp;
+		*ppp = (*ppp)->next;
+		free(p);
 	}
 
-	void *p = *ppp;
-	*ppp = (*ppp)->next;
-	free(p);
+	player_triggers();
 }
 
 static void players_list(struct monitor_t *mp, const char *str)
@@ -121,7 +134,7 @@ static void players_list(struct monitor_t *mp, const char *str)
 	// Extract maximum allowed number of players
 	if (match[3].rm_so < 0) {
 		cmd_printf(CLR_ERROR, "%s: Matching 3 failed\n", __func__);
-		return;
+		goto triggers;
 	}
 
 	num = strtoul(str + match[3].rm_so, NULL, 0);
@@ -132,12 +145,12 @@ static void players_list(struct monitor_t *mp, const char *str)
 	// Extract player list
 	if (match[4].rm_so < 0) {
 		cmd_printf(CLR_ERROR, "%s: Matching 4 failed\n", __func__);
-		return;
+		goto triggers;
 	}
 
 	size_t len = match[4].rm_eo - match[4].rm_so;
 	if (len == 0)
-		return;
+		goto triggers;
 	char *pnames = malloc(len + 1);
 	memcpy(pnames, str + match[4].rm_so, len);
 	pnames[len] = 0;
@@ -159,6 +172,9 @@ static void players_list(struct monitor_t *mp, const char *str)
 		data.player = pp;
 	}
 	free(pnames);
+
+triggers:
+	player_triggers();
 }
 
 static struct mon_monitor_t players_monitors[] = {
@@ -177,6 +193,7 @@ static void players_reset()
 		data.player = data.player->next;
 		free(p);
 	}
+	player_triggers();
 }
 
 static void players_ready()
