@@ -8,7 +8,7 @@ node_modules: package.json
 	npm install
 	touch node_modules
 
-build: src/*
+build: $(wildcard src/**/*)  
 	npm run build
 
 clean:
