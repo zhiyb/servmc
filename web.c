@@ -2,9 +2,15 @@
 #include <pthread.h>
 #include <libwebsockets.h>
 #include "cmd.h"
+#include "query.h"
 #include "config.h"
 
-#define RX_BUFFER_SIZE	256
+#define RX_BUFFER_SIZE	1024
+
+struct post_t {
+	char *p, *rp;
+	size_t len, rlen;
+};
 
 static pthread_t thread;
 static pthread_mutex_t msgs_mutex;
@@ -28,7 +34,7 @@ static int web_console(struct lws *wsi, enum lws_callback_reasons reason,
 static struct lws_protocols protocols[] = {
 	// The first protocol must always be the HTTP handler
 	// Name, callback, per session data, max frame size / rx buffer
-	{"http-only", web_http, 0, 0},
+	{"http-only", web_http, sizeof(struct post_t), RX_BUFFER_SIZE},
 	{"web-console", web_console, 0, RX_BUFFER_SIZE},
 	{NULL, NULL, 0, 0}	// Terminator
 };
@@ -41,11 +47,72 @@ static const char *web_file_ext(const char *path)
 	return dot + 1;
 }
 
+static int web_post_url(struct lws *wsi)
+{
+	size_t size = lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI);
+	if (size > 32)
+		return -1;
+	char url[size + 1];
+	int n = lws_hdr_copy(wsi, url, sizeof(url), WSI_TOKEN_POST_URI);
+	if (n < 0)
+		return -1;
+	cmd_printf(CLR_WEB, "%s: HTTP POST: %s\n", __func__, url);
+	if (strcmp(url, "/q") != 0)
+		return -1;
+	return 0;
+}
+
 static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		void *user, void *in, size_t len)
 {
+	struct post_t *psd = (struct post_t *)user;
 	static const size_t flen = strlen(WEB_PATH);
-	if (reason == LWS_CALLBACK_HTTP) {
+	if (reason == LWS_CALLBACK_HTTP_BODY) {
+		psd->p = realloc(psd->p, psd->len + len + 1);
+		memcpy(psd->p + psd->len, in, len);
+		psd->len += len;
+		*(psd->p + psd->len) = 0;
+	} else if (reason == LWS_CALLBACK_HTTP_BODY_COMPLETION) {
+		cmd_printf(CLR_WEB, "%s: HTTP POST data: %s\n",
+				__func__, psd->p);
+		// Process POST data
+		psd->rp = query_json_doc(psd->p, LWS_PRE);
+		psd->rlen = strlen(psd->rp + LWS_PRE);
+		// Write response header
+		unsigned char *hdr = malloc(LWS_PRE + 1024);
+		unsigned char *start = hdr + LWS_PRE, *end = start + 1024;
+		unsigned char *p = (void *)start;
+		if (lws_add_http_header_status(wsi, HTTP_STATUS_OK, &p, end) ||
+		lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+			(const void *)"application/json", 16, &p, end) ||
+		lws_add_http_header_content_length(wsi, psd->rlen, &p, end) ||
+		lws_finalize_http_header(wsi, &p, end) ||
+		lws_write(wsi, start, p - start, LWS_WRITE_HTTP_HEADERS) < 0) {
+			free(hdr);
+			return -1;
+		}
+		free(hdr);
+		lws_callback_on_writable(wsi);
+	} else if (reason == LWS_CALLBACK_HTTP_WRITEABLE) {
+		if (!psd->len)
+			return -1;
+		if (lws_write(wsi, (unsigned char *)psd->rp + LWS_PRE,
+			      psd->rlen, LWS_WRITE_HTTP) < 0)
+			return -1;
+		if (lws_http_transaction_completed(wsi))
+			return -1;
+	} else if (reason == LWS_CALLBACK_CLOSED_HTTP) {
+		if (psd) {
+			free(psd->p);
+			psd->p = NULL;
+			psd->len = 0;
+			free(psd->rp);
+			psd->rp = NULL;
+			psd->rlen = 0;
+		}
+	} else if (reason == LWS_CALLBACK_HTTP) {
+		if (lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI))
+			return web_post_url(wsi);
 		const char *url = in;
 		http_path = realloc(http_path, flen + len + 2 + 10);
 		// TODO: URL validation
@@ -67,6 +134,8 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 				__func__, url, type, http_path);
 		if (lws_serve_http_file(wsi, http_path, type, NULL, 0) < 0)
 			return -1;
+	} else if (reason == LWS_CALLBACK_RECEIVE) {
+		cmd_printf(CLR_WEB, "%s:%u\n", __func__, __LINE__);
 	} else if (reason == LWS_CALLBACK_HTTP_FILE_COMPLETION) {
 		if (lws_http_transaction_completed(wsi))
 			return -1;
