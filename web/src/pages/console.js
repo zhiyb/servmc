@@ -126,11 +126,12 @@ class console extends Component {
 			</div>
 		);
 	}
+
+	propTypes = {
+		classes: PropTypes.object.isRequired,
+	};
 }
 
-console.propTypes = {
-	classes: PropTypes.object.isRequired,
-};
 
 export default withStyles(styles)(console);
 // export default console;

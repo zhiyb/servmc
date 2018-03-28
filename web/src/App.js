@@ -232,11 +232,12 @@ class App extends Component {
       </div>
     );
   }
+
+  propTypes = {
+    classes: PropTypes.object.isRequired,
+  };
 }
 
-App.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
 // export default App;
 export default withStyles(styles, { withTheme: true })(App);
