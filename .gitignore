@@ -1,7 +1,4 @@
-servmc
 server/
-*.o
-*.d
 *.mgc
 www
 
