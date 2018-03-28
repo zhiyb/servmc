@@ -4,9 +4,9 @@
 #include <regex.h>
 #include <sys/types.h>
 #include "cmd.h"
-#include "restart.h"
 #include "monitor.h"
 #include "config.h"
+#include "mon/restart.h"
 
 #define ARRAY_SIZE(a)	(sizeof(a) / sizeof((a)[0]))
 
@@ -24,10 +24,12 @@ static struct {
 
 extern struct mon_module_t mon_players;
 extern struct mon_module_t mon_backup;
+extern struct mon_module_t mon_restart;
 
 static struct mon_module_t *modules[] = {
 	&mon_players,
 	&mon_backup,
+	&mon_restart,
 };
 
 struct monitor_t *monitor_install(const char *regex, monitor_func_t func)

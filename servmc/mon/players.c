@@ -7,6 +7,7 @@
 #include "../monitor.h"
 #include "../config.h"
 #include "backup.h"
+#include "restart.h"
 
 struct player_t {
 	struct player_t *next;
@@ -26,6 +27,7 @@ int players_online()
 static void player_triggers()
 {
 	backup_players(data.cnt);
+	restart_players(data.cnt);
 }
 
 static struct player_t **players_find(const char *name)

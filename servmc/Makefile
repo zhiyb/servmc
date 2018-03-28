@@ -1,5 +1,4 @@
-OBJS	:= main.o exec.o cmd.o net.o update.o monitor.o restart.o
-OBJS	+= web.o action.o
+OBJS	:= main.o exec.o cmd.o net.o update.o monitor.o web.o action.o
 OBJS	+= $(subst .c,.o,$(wildcard mon/*.c))
 TRG		= servmc
 

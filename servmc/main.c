@@ -14,15 +14,15 @@
 #include "exec.h"
 #include "update.h"
 #include "monitor.h"
-#include "restart.h"
 #include "config.h"
 #include "mon/backup.h"
+#include "mon/restart.h"
 
 void tick()
 {
 	backup_tick(NULL);
 	update_tick();
-	restart_tick();
+	restart_tick(NULL);
 }
 
 int main(int argc, char *argv[])

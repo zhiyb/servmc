@@ -6,8 +6,8 @@
 #include "cmd.h"
 #include "exec.h"
 #include "monitor.h"
-#include "restart.h"
 #include "config.h"
+#include "mon/restart.h"
 
 static struct {
 	char *version;
