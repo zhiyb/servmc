@@ -1,47 +1,21 @@
-OBJS	:= main.o exec.o cmd.o net.o update.o monitor.o backup.o restart.o
-OBJS	+= web.o query.o
-OBJS	+= $(subst .c,.o,$(wildcard mon/*.c))
-TRG		= servmc
-
-override	CFLAGS	+= -Wall -Werror -O2
-override	CFLAGS	+= $(shell curl-config --cflags)
-override	CFLAGS	+= $(shell pkg-config --cflags json-c)
-override	CFLAGS	+= $(shell pkg-config --cflags libwebsockets)
-override	LDFLAGS	+= -Wall -Werror -O2
-override	LIBS	+= $(shell curl-config --libs)
-override	LIBS	+= $(shell pkg-config --libs json-c)
-override	LIBS	+= $(shell pkg-config --libs libwebsockets)
-override	LIBS	+= -lreadline -lmagic -lpthread
-
 .PHONY: all
-all: all-$(TRG) all-web
+all: all-servmc all-web
 
 .PHONY: clean
-clean: clean-$(TRG) clean-web
+clean: clean-servmc clean-web
 
 .PHONY: distclean
-distclean: clean-$(TRG) distclean-web
+distclean: distclean-servmc distclean-web
 
 .PHONY: run
 run: all
-	./$(TRG)
+	./servmc/servmc
 
-# $(TRG) related rules
+# servmc related rules
 
-.PHONY: all-$(TRG)
-all-$(TRG): $(TRG)
-
-$(TRG): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
-
-.c.o:
-	$(CC) $(CFLAGS) -o $@ -c $< -MMD
-
--include $(OBJS:%.o=%.d)
-
-.PHONY: clean-$(TRG)
-clean-$(TRG):
-	rm -f $(OBJS) $(OBJS:%.o=%.d)
+.PHONY: all-servmc clean-servmc distclean-servmc
+all-servmc clean-servmc distclean-servmc: %-servmc:
+	$(MAKE) -C servmc $*
 
 # Web page related rules
 
@@ -52,12 +26,7 @@ all-web: | www
 www:
 	ln -sf web/build www
 
-.PHONY: clean-web
-clean-web:
-	$(MAKE) -C web clean
-	rm -f www
-
-.PHONY: distclean-web
-distclean-web:
-	$(MAKE) -C web distclean
+.PHONY: clean-web distclean-web
+clean-web distclean-web: %-web:
+	$(MAKE) -C web $*
 	rm -f www

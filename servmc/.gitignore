@@ -1,0 +1,4 @@
+servmc
+*.o
+*.d
+*.mgc
