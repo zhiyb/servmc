@@ -27,6 +27,7 @@ const styles = theme => ({
 	},
 	pager: {
 		padding: 0,
+		overflow: "hidden",
 	},
 });
 
@@ -35,8 +36,8 @@ class console extends Component {
 	msgsScroll = null;
 
 	msgsAppend = str => {
-		if(this.msgs)this.msgs.insertAdjacentHTML("beforeend", this.colourd(str).replace(/\n/g, "<br>"));
-		if(this.msgsScroll)this.msgsScroll.scrollTop = this.msgsScroll.scrollHeight;
+		if (this.msgs) this.msgs.insertAdjacentHTML("beforeend", this.colourd(str).replace(/\n/g, "<br>"));
+		if (this.msgsScroll) this.msgsScroll.scrollTop = this.msgsScroll.scrollHeight;
 	};
 
 	colourd = str => {
