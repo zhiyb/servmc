@@ -12,9 +12,8 @@ import Divider from 'material-ui/Divider';
 import IconButton from 'material-ui/IconButton';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import { CircularProgress } from 'material-ui/Progress';
-import IconConnectionSucceeded from 'material-ui-icons/Sync';
-import IconConnectionDisabled from 'material-ui-icons/SyncDisabled';
-import IconConnectionProblem from 'material-ui-icons/SyncProblem';
+import IconAccount from 'material-ui-icons/AccountCircle';
+
 import MenuIcon from 'material-ui-icons/Menu';
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
@@ -123,7 +122,6 @@ class App extends Component {
     open: false,
     page: pages[0],
     anchorEl: null,
-    connectionStaus: false,
   };
 
   handleDrawerOpen = () => {
@@ -163,18 +161,14 @@ class App extends Component {
             <Typography variant="title" color="inherit" noWrap className={classes.flex}>
               ServMC控制台
             </Typography>
-            {(this.state.connectionStaus === null)?(
-              <CircularProgress className={classes.progress} color="write"/>
-            ):(
               <IconButton
                 aria-owns={Boolean(this.state.anchorEl) ? 'menu-appbar' : null}
                 aria-haspopup="true"
                 onClick={this.handleConnectionMenu}
                 color="inherit"
               >
-                {this.state.connectionStaus?<IconConnectionSucceeded />:<IconConnectionDisabled />}
+                <IconAccount />
               </IconButton>
-            )}
             <Menu
               id="menu-appbar"
               anchorEl={this.state.anchorEl}
@@ -191,12 +185,10 @@ class App extends Component {
             >
               <MenuItem onClick={()=>{
                 this.handleConnectionMenuClose()
-                this.setState({ connectionStaus: true });
-              }}>连接</MenuItem>
+              }}>……</MenuItem>
               <MenuItem onClick={()=>{
                 this.handleConnectionMenuClose()
-                this.setState({ connectionStaus: null });
-              }}>断开连接</MenuItem>
+              }}>……</MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
