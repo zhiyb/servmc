@@ -1,5 +1,5 @@
 SRCS	= main.c exec.c cmd.c net.c update.c monitor.c backup.c restart.c web.c
-TRG	= servmc
+TRG		= servmc
 
 OBJS	= $(SRCS:.c=.o)
 
@@ -14,7 +14,8 @@ override	LIBS	+= $(shell pkg-config --libs libwebsockets)
 override	LIBS	+= -lreadline -lmagic -lpthread
 
 .PHONY: all
-all: $(TRG)
+all: $(TRG) www
+	$(MAKE) -C web
 
 $(TRG): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
@@ -24,6 +25,10 @@ $(TRG): $(OBJS)
 
 -include $(OBJS:%.o=%.d)
 
+www:
+	rm -f www
+	ln -s web/build www
+
 .PHONY: run
 run: $(TRG)
 	./$(TRG)
@@ -31,3 +36,4 @@ run: $(TRG)
 .PHONY: clean
 clean:
 	rm -f $(OBJS) $(OBJS:%.o=%.d)
+	$(MAKE) -C web clean

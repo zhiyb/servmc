@@ -3,6 +3,7 @@ server/
 *.o
 *.d
 *.mgc
+www
 
 #MacOS
 .DS_Store
