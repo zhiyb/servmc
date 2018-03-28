@@ -34,7 +34,7 @@ class console extends Component {
 	msgsScroll = null;
 	ws = null;
 
-	commands = Array();	//历史命令记录
+	commands = [];	//历史命令记录
 	commandsNow = null;
 
 	msgsAppend = str => {
