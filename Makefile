@@ -1,7 +1,5 @@
-SRCS	= main.c exec.c cmd.c net.c update.c monitor.c backup.c restart.c web.c
+OBJS	= main.o exec.o cmd.o net.o update.o monitor.o backup.o restart.o web.o
 TRG		= servmc
-
-OBJS	= $(SRCS:.c=.o)
 
 override	CFLAGS	+= -Wall -Werror -O2
 override	CFLAGS	+= $(shell curl-config --cflags)
@@ -14,8 +12,22 @@ override	LIBS	+= $(shell pkg-config --libs libwebsockets)
 override	LIBS	+= -lreadline -lmagic -lpthread
 
 .PHONY: all
-all: $(TRG) www
-	$(MAKE) -C web
+all: all-$(TRG) all-web
+
+.PHONY: clean
+clean: clean-$(TRG) clean-web
+
+.PHONY: distclean
+distclean: clean-$(TRG) distclean-web
+
+.PHONY: run
+run: all
+	./$(TRG)
+
+# $(TRG) related rules
+
+.PHONY: all-$(TRG)
+all-$(TRG): $(TRG)
 
 $(TRG): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
@@ -25,15 +37,25 @@ $(TRG): $(OBJS)
 
 -include $(OBJS:%.o=%.d)
 
-www:
-	rm -f www
-	ln -s web/build www
-
-.PHONY: run
-run: $(TRG)
-	./$(TRG)
-
-.PHONY: clean
-clean:
+.PHONY: clean-$(TRG)
+clean-$(TRG):
 	rm -f $(OBJS) $(OBJS:%.o=%.d)
+
+# Web page related rules
+
+.PHONY: all-web
+all-web: | www
+	$(MAKE) -C web
+
+www:
+	ln -sf web/build www
+
+.PHONY: clean-web
+clean-web:
 	$(MAKE) -C web clean
+	rm -f www
+
+.PHONY: distclean-web
+distclean-web:
+	$(MAKE) -C web distclean
+	rm -f www

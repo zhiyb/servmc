@@ -1,19 +1,19 @@
-
 .PHONY: all
-all: install build
+all: node_modules build
 
-install: node_modules
+.DELETE_ON_ERROR:
 
 node_modules: package.json
 	npm install
 	touch node_modules
 
-build: $(wildcard src/**/*)  
+build: node_modules $(wildcard src/* src/pages/*)
 	npm run build
 
+.PHONY: clean
 clean:
 	rm -rf build
 
-cleanall:
+.PHONY: distclean
+distclean: clean
 	rm -rf node_modules
-	rm -rf build
