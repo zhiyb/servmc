@@ -114,7 +114,7 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										在线人数
 									</Typography>
-									<CircularProgress className={classes.progress} variant="static" value={19} size={80} />
+									<CircularProgress className={classes.progress} variant="static" value={this.state.players?this.state.players.online/this.state.players.max*100:100} size={80} />
 									<Typography variant="headline" component="h2">
 									{this.state.players ? this.state.players.online : "?"}/{this.state.players ? this.state.players.max : "?"}
 									</Typography>
