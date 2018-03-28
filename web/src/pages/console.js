@@ -98,6 +98,11 @@ class console extends Component {
 		this.ws.onmessage = msg => { this.msgsAppend(msg.data); }
 	}
 
+	componentWillUnmount() {
+		this.ws.close();
+		this.ws = null;
+	}
+
 	render() {
 		const { classes } = this.props;
 
