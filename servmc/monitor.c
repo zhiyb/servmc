@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <regex.h>
 #include <sys/types.h>
 #include "cmd.h"
@@ -148,4 +149,17 @@ void mon_deinit()
 			mmp++;
 		}
 	}
+}
+
+struct json_object *mon_json(struct json_object *act, const char *type)
+{
+	for (int i = 0; i != ARRAY_SIZE(modules); i++) {
+		struct mon_module_t *mmp = modules[i];
+		if (strcmp(mmp->name, type) == 0) {
+			if (mmp->json)
+				return mmp->json(act);
+			return NULL;
+		}
+	}
+	return NULL;
 }

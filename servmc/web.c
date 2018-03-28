@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include <libwebsockets.h>
 #include "cmd.h"
-#include "query.h"
+#include "action.h"
 #include "config.h"
 
 #define RX_BUFFER_SIZE	1024
@@ -128,7 +128,7 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		cmd_printf(CLR_WEB, "%s: HTTP POST data: %s\n",
 				__func__, psd->p);
 		// Process POST data
-		psd->rp = query_json_doc(psd->p, LWS_PRE);
+		psd->rp = action_json_doc(psd->p, LWS_PRE);
 		psd->rlen = strlen(psd->rp + LWS_PRE);
 		// Write response header
 		unsigned char *hdr = malloc(LWS_PRE + 1024);

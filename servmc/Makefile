@@ -1,15 +1,13 @@
 OBJS	:= main.o exec.o cmd.o net.o update.o monitor.o backup.o restart.o
-OBJS	+= web.o query.o
+OBJS	+= web.o action.o
 OBJS	+= $(subst .c,.o,$(wildcard mon/*.c))
 TRG		= servmc
 
 override	CFLAGS	+= -Wall -Werror -O2
-override	CFLAGS	+= -Ilibws/include
 override	CFLAGS	+= $(shell curl-config --cflags)
 override	CFLAGS	+= $(shell pkg-config --cflags json-c)
 override	CFLAGS	+= $(shell pkg-config --cflags libwebsockets)
 override	LDFLAGS	+= -Wall -Werror -O2
-override	LIBS	+= -Llibws/lib -lwebsockets -Wl,-rpath=$(PWD)/libws/lib
 override	LIBS	+= $(shell curl-config --libs)
 override	LIBS	+= $(shell pkg-config --libs json-c)
 override	LIBS	+= $(shell pkg-config --libs libwebsockets)

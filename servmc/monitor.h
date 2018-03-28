@@ -1,5 +1,7 @@
 #pragma once
 
+#include <json.h>
+
 struct monitor_t;
 typedef void (*monitor_func_t)(struct monitor_t *, const char *);
 
@@ -15,6 +17,7 @@ struct mon_module_t {
 	void (*const ready)();
 	void (*const stop)();
 	void (*const line)(const char *str);
+	struct json_object *(*const json)(struct json_object *act);
 };
 
 struct monitor_t *monitor_install(const char *regex, monitor_func_t func);
@@ -29,3 +32,4 @@ void monitor_server_stop();
 
 void mon_init();
 void mon_deinit();
+struct json_object *mon_json(struct json_object *act, const char *type);
