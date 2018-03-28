@@ -34,6 +34,7 @@ const styles = theme => ({
 class console extends Component {
 	msgs = null;
 	msgsScroll = null;
+	ws = null;
 
 	msgsAppend = str => {
 		if (this.msgs) this.msgs.insertAdjacentHTML("beforeend", this.colourd(str).replace(/\n/g, "<br>"));
@@ -94,7 +95,7 @@ class console extends Component {
 		this.ws = new WebSocket(url, "web-console");
 		this.ws.onopen = () => { this.msgsAppend("WebSocket connected\n"); }
 		this.ws.onclose = () => { this.msgsAppend("WebSocket disconnected\n"); }
-		this.ws.onmessage = (msg) => { this.msgsAppend(msg.data); }
+		this.ws.onmessage = msg => { this.msgsAppend(msg.data); }
 	}
 
 	render() {
@@ -113,7 +114,7 @@ class console extends Component {
 						id="command"
 						onKeyUp={event => {
 							if (event.keyCode === 13) {
-								this.ws.send(event.target.value);
+								if (this.ws) this.ws.send(event.target.value);
 								event.target.value = "";	//清空文本框
 							}
 						}}
