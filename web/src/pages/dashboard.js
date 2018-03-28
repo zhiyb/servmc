@@ -82,6 +82,16 @@ class dashboard extends Component {
 							<Grid item>
 								<Paper className={classes.paper}>
 									<Typography className={classes.title} color="textSecondary">
+										服务器名
+									</Typography>
+									<Typography variant="headline" component="h2">
+										xxxx
+									</Typography>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper}>
+									<Typography className={classes.title} color="textSecondary">
 										在线人数
 									</Typography>
 									<CircularProgress className={classes.progress} variant="static" value={19} size={80} />
@@ -93,10 +103,30 @@ class dashboard extends Component {
 							<Grid item>
 								<Paper className={classes.paper}>
 									<Typography className={classes.title} color="textSecondary">
+										备份状态
+									</Typography>
+									<Typography variant="headline" component="h2">
+										最后备份于<br/>xxxx
+									</Typography>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper}>
+									<Typography className={classes.title} color="textSecondary">
 										游戏版本
 									</Typography>
 									<Typography variant="headline" component="h2">
 										18w11a
+									</Typography>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper}>
+									<Typography className={classes.title} color="textSecondary">
+										运行时间
+									</Typography>
+									<Typography variant="headline" component="h2">
+										xxx
 									</Typography>
 								</Paper>
 							</Grid>
@@ -137,6 +167,16 @@ class dashboard extends Component {
 									</Typography>
 									<Typography variant="headline" component="h2">
 										1.1  1.3  1.71
+									</Typography>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper}>
+									<Typography className={classes.title} color="textSecondary">
+										ServMC版本号
+									</Typography>
+									<Typography variant="headline" component="h2">
+										0.1 - Alpha
 									</Typography>
 								</Paper>
 							</Grid>
