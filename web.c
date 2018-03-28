@@ -47,16 +47,68 @@ static const char *web_file_ext(const char *path)
 	return dot + 1;
 }
 
-static int web_post_url(struct lws *wsi)
+static const char *web_access_header_str()
 {
-	size_t size = lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI);
-	if (size > 32)
+	return "access-control-allow-origin: *\n"
+		"access-control-allow-headers: content-type\n";
+}
+
+static int web_access_header(struct lws *wsi,
+		unsigned char **p, unsigned char *end)
+{
+	return lws_add_http_header_by_token(wsi,
+			WSI_TOKEN_HTTP_ACCESS_CONTROL_ALLOW_ORIGIN,
+			(const void *)"*", 1, p, end) ||
+		lws_add_http_header_by_name(wsi,
+			(const void *)"access-control-allow-headers:",
+			(const void *)"content-type", 12, p, end);
+}
+
+static int web_options(struct lws *wsi, int len)
+{
+	if (len > 32)
 		return -1;
-	char url[size + 1];
+	char url[len + 1];
+	int n = lws_hdr_copy(wsi, url, sizeof(url), WSI_TOKEN_OPTIONS_URI);
+	if (n < 0)
+		return -1;
+	cmd_printf(CLR_WEB, "%s: HTTP OPTIONS: %s\n", __func__, url);
+
+	// Allowed methods
+	const char *allow = "GET";
+	if (strcmp(url, "/q") == 0)
+		allow = "POST";
+
+	// Write response header
+	unsigned char *hdr = malloc(LWS_PRE + 1024);
+	unsigned char *start = hdr + LWS_PRE, *end = start + 1024;
+	unsigned char *p = (void *)start;
+	if (lws_add_http_header_status(wsi, HTTP_STATUS_OK, &p, end) ||
+		web_access_header(wsi, &p, end) ||
+		lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_ALLOW,
+			(const void *)allow, strlen(allow), &p, end) ||
+		lws_add_http_header_content_length(wsi, 0, &p, end) ||
+		lws_finalize_http_header(wsi, &p, end) ||
+		lws_write(wsi, start, p - start, LWS_WRITE_HTTP_HEADERS) < 0) {
+		free(hdr);
+		return -1;
+	}
+	free(hdr);
+	if (lws_http_transaction_completed(wsi))
+		return -1;
+	return 0;
+}
+
+static int web_post_url(struct lws *wsi, int len)
+{
+	if (len > 32)
+		return -1;
+	char url[len + 1];
 	int n = lws_hdr_copy(wsi, url, sizeof(url), WSI_TOKEN_POST_URI);
 	if (n < 0)
 		return -1;
 	cmd_printf(CLR_WEB, "%s: HTTP POST: %s\n", __func__, url);
+
 	if (strcmp(url, "/q") != 0)
 		return -1;
 	return 0;
@@ -83,6 +135,7 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		unsigned char *start = hdr + LWS_PRE, *end = start + 1024;
 		unsigned char *p = (void *)start;
 		if (lws_add_http_header_status(wsi, HTTP_STATUS_OK, &p, end) ||
+		web_access_header(wsi, &p, end) ||
 		lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
 			(const void *)"application/json", 16, &p, end) ||
 		lws_add_http_header_content_length(wsi, psd->rlen, &p, end) ||
@@ -111,13 +164,17 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 			psd->rlen = 0;
 		}
 	} else if (reason == LWS_CALLBACK_HTTP) {
-		if (lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI))
-			return web_post_url(wsi);
+		int hlen;
+		if ((hlen = lws_hdr_total_length(wsi, WSI_TOKEN_OPTIONS_URI)))
+			return web_options(wsi, hlen);
+		else if ((hlen = lws_hdr_total_length(wsi, WSI_TOKEN_POST_URI)))
+			return web_post_url(wsi, hlen);
 		const char *url = in;
 		http_path = realloc(http_path, flen + len + 2 + 10);
 		// TODO: URL validation
 		sprintf(http_path, WEB_PATH "%s%s", url,
 				url[len - 1] == '/' ? "index.html" : "");
+		cmd_printf(CLR_WEB, "%s: HTTP request: %s (%u) %s\n", __func__, url, len, http_path);
 		// Check file MIME type
 		const char *ext = web_file_ext(http_path);
 		const char *type = NULL;
@@ -132,7 +189,9 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		// Send file
 		cmd_printf(CLR_WEB, "%s: HTTP request: %s (%s: %s)\n",
 				__func__, url, type, http_path);
-		if (lws_serve_http_file(wsi, http_path, type, NULL, 0) < 0)
+		const char *hp = web_access_header_str();
+		if (lws_serve_http_file(wsi, http_path, type,
+					hp, strlen(hp)) < 0)
 			return -1;
 	} else if (reason == LWS_CALLBACK_RECEIVE) {
 		cmd_printf(CLR_WEB, "%s:%u\n", __func__, __LINE__);

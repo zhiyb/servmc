@@ -33,8 +33,8 @@
 #define REGEX_SERVER(type) "^\\[[0-9]{2}:[0-9]{2}:[0-9]{2}\\] " \
 			"\\[Server thread\\/" #type "\\]: "
 #define REGEX_READY	REGEX_SERVER(INFO) "Done \\([0-9.]+s\\)!"
-#define REGEX_LOGIN	REGEX_SERVER(INFO) "[^\\s]+ joined the game$"
-#define REGEX_LOGOUT	REGEX_SERVER(INFO) "[^\\s]+ left the game$"
+#define REGEX_LOGIN	REGEX_SERVER(INFO) "([^\\s]+) joined the game$"
+#define REGEX_LOGOUT	REGEX_SERVER(INFO) "([^\\s]+) left the game$"
 #define REGEX_PLAYERS	REGEX_SERVER(INFO) "There are ([0-9]+)( of a max |\\/)[0-9]+ players online:"
 #define REGEX_SAVE	REGEX_SERVER(INFO) "Saved the (game|world)$"
 #define REGEX_LINE	REGEX_SERVER(INFO)
