@@ -6,6 +6,8 @@ import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 
+import query from '../query';
+
 const styles = theme => ({
 	root: {
 		flexGrow: 1,
@@ -29,6 +31,16 @@ const styles = theme => ({
 });
 
 class dashboard extends Component {
+
+	state = {
+		version: null,
+	};
+
+	componentDidMount() {
+		query({"type":"version"}).then((ret) => {
+			this.setState({version: ret})
+		})
+	}
 
 	render() {
 		const { classes } = this.props;
@@ -116,7 +128,7 @@ class dashboard extends Component {
 										游戏版本
 									</Typography>
 									<Typography variant="headline" component="h2">
-										18w11a
+										{this.state.version?this.state.version:"查询中……"}
 									</Typography>
 								</Paper>
 							</Grid>
