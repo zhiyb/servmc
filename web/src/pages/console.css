@@ -1,10 +1,6 @@
-
-  
 #msgs {
-	display: block;
-	position: sticky;
+	width: 0;
 	white-space: nowrap;
-
 
 	margin: 6px;
 	font-family: Lucida Console,Courier New;

@@ -31,8 +31,7 @@ const styles = theme => ({
 		marginTop: theme.spacing.unit * 3,
 
 	height: "60vh",
-	"overflow-x": "auto",
-	"overflow-y": "auto",
+	overflow: "auto",
 	}),
 });
 
