@@ -37,7 +37,7 @@ class dashboard extends Component {
 	};
 
 	componentDidMount() {
-		query({"type":"version"}).then((ret) => {
+		query({"action":"query","type":"version"}).then((ret) => {
 			this.setState({version: ret})
 		})
 	}
