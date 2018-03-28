@@ -10,6 +10,11 @@ import List from 'material-ui/List';
 import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
 import IconButton from 'material-ui/IconButton';
+import Menu, { MenuItem } from 'material-ui/Menu';
+import { CircularProgress } from 'material-ui/Progress';
+import IconConnectionSucceeded from 'material-ui-icons/Sync';
+import IconConnectionDisabled from 'material-ui-icons/SyncDisabled';
+import IconConnectionProblem from 'material-ui-icons/SyncProblem';
 import MenuIcon from 'material-ui-icons/Menu';
 import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
@@ -49,8 +54,11 @@ const styles = theme => ({
     }),
   },
   menuButton: {
-    marginLeft: 12,
+    marginLeft: -12,
     marginRight: 36,
+  },
+  flex: {
+    flex: 1,
   },
   hide: {
     display: 'none',
@@ -114,6 +122,8 @@ class App extends Component {
   state = {
     open: false,
     page: pages[0],
+    anchorEl: null,
+    connectionStaus: false,
   };
 
   handleDrawerOpen = () => {
@@ -122,6 +132,14 @@ class App extends Component {
 
   handleDrawerClose = () => {
     this.setState({ open: false });
+  };
+
+  handleConnectionMenu = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleConnectionMenuClose = () => {
+    this.setState({ anchorEl: null });
   };
 
   render() {
@@ -133,7 +151,7 @@ class App extends Component {
           position="absolute"
           className={classNames(classes.appBar, this.state.open && classes.appBarShift)}
         >
-          <Toolbar disableGutters={!this.state.open}>
+          <Toolbar>
             <IconButton
               color="inherit"
               aria-label="open drawer"
@@ -142,9 +160,44 @@ class App extends Component {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="title" color="inherit" noWrap>
+            <Typography variant="title" color="inherit" noWrap className={classes.flex}>
               ServMC控制台
             </Typography>
+            {(this.state.connectionStaus === null)?(
+              <CircularProgress className={classes.progress} color="write"/>
+            ):(
+              <IconButton
+                aria-owns={Boolean(this.state.anchorEl) ? 'menu-appbar' : null}
+                aria-haspopup="true"
+                onClick={this.handleConnectionMenu}
+                color="inherit"
+              >
+                {this.state.connectionStaus?<IconConnectionSucceeded />:<IconConnectionDisabled />}
+              </IconButton>
+            )}
+            <Menu
+              id="menu-appbar"
+              anchorEl={this.state.anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(this.state.anchorEl)}
+              onClose={this.handleConnectionMenuClose}
+            >
+              <MenuItem onClick={()=>{
+                this.handleConnectionMenuClose()
+                this.setState({ connectionStaus: true });
+              }}>连接</MenuItem>
+              <MenuItem onClick={()=>{
+                this.handleConnectionMenuClose()
+                this.setState({ connectionStaus: null });
+              }}>断开连接</MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
         <Drawer
