@@ -185,6 +185,16 @@ class dashboard extends Component {
 							<Grid item>
 								<Paper className={classes.paper}>
 									<Typography className={classes.title} color="textSecondary">
+										开机时间
+									</Typography>
+									<Typography variant="headline" component="h2">
+										1d 2h 36min
+									</Typography>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper}>
+									<Typography className={classes.title} color="textSecondary">
 										ServMC版本号
 									</Typography>
 									<Typography variant="headline" component="h2">
