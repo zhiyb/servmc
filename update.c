@@ -32,15 +32,11 @@ static struct json_object *update_parse(const char *doc, size_t size)
 {
 	struct json_tokener *tok = json_tokener_new();
 	struct json_object *root = json_tokener_parse_ex(tok, doc, size);
-
 	int err = json_tokener_get_error(tok);
-	if (err != json_tokener_success) {
+	if (err != json_tokener_success)
 		cmd_printf(CLR_ERROR, "%s: Error parsing json: %s\n",
 				__func__, json_tokener_error_desc(err));
-		goto ret;
-	}
-
-ret:	json_tokener_free(tok);
+	json_tokener_free(tok);
 	return root;
 }
 
