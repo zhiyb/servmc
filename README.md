@@ -1,12 +1,26 @@
-# Depend
+# ServMC: Minecraft Server Management Console
+
+This is a helper program. By encapsulating the server application for the Java version of Minecraft, it provides useful server management functionalities. It also features an improved console interface and an intuitive web interface.
+
+## Features
+
++ Improved console user interface, using Readline and the GNU History Library
++ Intuitive web interface, using React and Matrial Design
++ WebSocket supports real-time web-based console
++ Automatic backup scheduler
++ Automatic server version update
++ Server restart management
+
+# Build dependencies
 
 ## Linux
 
-### Debian and Ubuntu based
+### Debian-based distributions
 
 ```
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
+sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev libwebsockets-dev libreadline-dev libmagic-dev
 ```
 
 ## MacOS
@@ -23,13 +37,13 @@ sudo brew install node
 
 # Build
 
-## Linux Build:
+## Linux
 
 ```
 make
 ```
 
-## MacOS Build:
+## MacOS
 
 ### Homebrew
 
