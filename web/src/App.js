@@ -32,7 +32,6 @@ const styles = theme => ({
     overflow: 'hidden',
     position: 'relative',
     display: 'flex',
-    'white-space': 'nowrap',
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -63,6 +62,7 @@ const styles = theme => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    'white-space': 'nowrap',
   },
   drawerPaperClose: {
     overflowX: 'hidden',
