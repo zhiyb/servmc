@@ -93,7 +93,7 @@ let request = (options) => {
 			})
 		})
 		.then((ret) => {	//错误处理，这个过程会尽可能处理通用错误，菲通用的错误再抛出做具体特定处理
-			if (ret.retCode)	//如果有错误代码则按照处理
+			if (ret !== null && ret.retCode)	//如果有错误代码则按照处理
 				switch (ret.retCode) {
 					case 1:		//网络异常
 						return Promise.reject(ret);		//抛出异常
