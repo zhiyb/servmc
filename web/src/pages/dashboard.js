@@ -33,13 +33,21 @@ const styles = theme => ({
 class dashboard extends Component {
 
 	state = {
-		version: null,
+		version: undefined,
+		players: undefined,
 	};
 
+	update = () =>{
+		query({ "action": "query", "type": "version" }).then((ret) => {
+			this.setState({ version: ret })
+		});
+		query({ "action": "query", "type": "players" }).then((ret) => {
+			this.setState({ players: ret })
+		});
+	}
+
 	componentDidMount() {
-		query({"action":"query","type":"version"}).then((ret) => {
-			this.setState({version: ret})
-		})
+		this.update();
 	}
 
 	render() {
@@ -62,9 +70,9 @@ class dashboard extends Component {
 									</Typography>
 									<pre>
 										10:01:00 YJBeetle 加入游戏
-										<br/>
+										<br />
 										10:02:02 YJBeetle 离开游戏
-										<br/>
+										<br />
 										10:10:35 zhiyb 离开游戏
 									</pre>
 								</Paper>
@@ -76,9 +84,9 @@ class dashboard extends Component {
 									</Typography>
 									<pre>
 										10:01:34 zhiyb: test msg
-										<br/>
+										<br />
 										10:01:42 YJBeetle: test msg
-										<br/>
+										<br />
 										10:01:56 YJBeetle: test msg
 									</pre>
 								</Paper>
@@ -108,7 +116,7 @@ class dashboard extends Component {
 									</Typography>
 									<CircularProgress className={classes.progress} variant="static" value={19} size={80} />
 									<Typography variant="headline" component="h2">
-										30/160
+									{this.state.players ? this.state.players.online : "?"}/{this.state.players ? this.state.players.max : "?"}
 									</Typography>
 								</Paper>
 							</Grid>
@@ -118,7 +126,7 @@ class dashboard extends Component {
 										备份状态
 									</Typography>
 									<Typography variant="headline" component="h2">
-										最后备份于<br/>xxxx
+										最后备份于<br />xxxx
 									</Typography>
 								</Paper>
 							</Grid>
@@ -128,7 +136,7 @@ class dashboard extends Component {
 										游戏版本
 									</Typography>
 									<Typography variant="headline" component="h2">
-										{this.state.version?this.state.version:"查询中……"}
+										{this.state.version ? this.state.version : "查询中……"}
 									</Typography>
 								</Paper>
 							</Grid>
@@ -153,11 +161,11 @@ class dashboard extends Component {
 							<Grid item>
 								<Paper className={classes.paper}>
 									<Typography className={classes.title} color="textSecondary">
-									内存使用率
+										内存使用率
 									</Typography>
 									<CircularProgress className={classes.progress} variant="static" value={67} size={80} />
 									<Typography variant="headline" component="h2">
-									67%
+										67%
 									</Typography>
 								</Paper>
 							</Grid>
@@ -168,7 +176,7 @@ class dashboard extends Component {
 									</Typography>
 									<CircularProgress className={classes.progress} variant="static" value={75} size={80} />
 									<Typography variant="headline" component="h2">
-									75%
+										75%
 									</Typography>
 								</Paper>
 							</Grid>
