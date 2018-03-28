@@ -53,12 +53,10 @@ static void backup_save(struct monitor_t *mp, const char *str)
 		cmd_printf(CLR_ERROR, "%s: Backup failed: %d\n", __func__, ret);
 	else
 		cmd_printf(CLR_BACKUP, "%s: Backup done\n", __func__);
-	// Disable callback
-	monitor_enable(backup_monitors[0].mon, 0);
 
 	// Send message to server
 	if (!monitor_server_status())
-		return;
+		goto ret;
 	char msg[64];
 	int ofs = snprintf(msg, sizeof(msg), "%s%s",
 			ret ? CMD_SAVE_FAIL : CMD_SAVE_DONE, ctime(&tm)) - 1;
@@ -74,6 +72,8 @@ static void backup_save(struct monitor_t *mp, const char *str)
 	// Schedule next backup
 	if (players_online())
 		backup_schedule();
+	// Disable callback
+ret:	monitor_enable(backup_monitors[0].mon, 0);
 }
 
 void backup_now()
@@ -110,9 +110,30 @@ void backup_tick(const char *str)
 	backup_prepare();
 }
 
+static struct json_object *backup_json(struct json_object *act)
+{
+	int active = monitor_enabled(backup_monitors[0].mon);
+	time_t schedule = data.schedule;
+
+	struct json_object *obj = json_object_new_object();
+	if (active) {
+		json_object_object_add(obj, "status",
+				json_object_new_string("active"));
+	} else if (schedule != (time_t)-1) {
+		json_object_object_add(obj, "status",
+				json_object_new_string("scheduled"));
+		json_object_object_add(obj, "time",
+				json_object_new_int64(schedule));
+	} else {
+		json_object_object_add(obj, "status",
+				json_object_new_string("idle"));
+	}
+	return obj;
+}
+
 struct mon_module_t mon_backup = {
 	.name = "backup",
 	.monitors = backup_monitors,
 	.line = backup_tick,
-	//.json = backup_json,
+	.json = backup_json,
 };
