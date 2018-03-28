@@ -1,0 +1,14 @@
+
+  
+#msgs {
+	display: block;
+	position: sticky;
+	white-space: nowrap;
+
+
+	margin: 6px;
+	font-family: Lucida Console,Courier New;
+
+	background: #fff;
+	color: #000;
+}
