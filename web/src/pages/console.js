@@ -30,8 +30,8 @@ const styles = theme => ({
 		paddingBottom: 16,
 		marginTop: theme.spacing.unit * 3,
 
-	height: "60vh",
-	overflow: "auto",
+		height: "60vh",
+		overflow: "auto",
 	}),
 });
 
@@ -88,7 +88,12 @@ class console extends Component {
 	};
 
 	componentDidMount() {
-		this.ws = new WebSocket("ws://localhost:25580", "web-console");
+		let url;
+		if (process.env.NODE_ENV === 'development')
+			url = "ws://localhost:25580";
+		else
+			url = "ws://" + this.props.location.hostname + ":" + this.props.location.port;
+		this.ws = new WebSocket(url, "web-console");
 		this.ws.onopen = function () { append("WebSocket connected\n"); }
 		this.ws.onclose = function () { append("WebSocket disconnected\n"); }
 		this.ws.onmessage = function (msg) { append(msg.data); }
