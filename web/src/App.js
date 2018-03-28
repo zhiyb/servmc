@@ -233,7 +233,7 @@ class App extends Component {
     );
   }
 
-  propTypes = {
+  static propTypes = {
     classes: PropTypes.object.isRequired,
   };
 }

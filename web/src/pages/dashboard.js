@@ -199,7 +199,7 @@ class dashboard extends Component {
 		);
 	}
 
-	propTypes = {
+	static propTypes = {
 		classes: PropTypes.object.isRequired,
 	};
 }
