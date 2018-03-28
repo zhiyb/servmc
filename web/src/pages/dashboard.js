@@ -21,6 +21,10 @@ const styles = theme => ({
 		padding: theme.spacing.unit * 2,
 		color: theme.palette.text.secondary,
 	},
+	progressbg: {
+		margin: theme.spacing.unit * 2,
+		position: "absolute",
+	},
 	progress: {
 		margin: theme.spacing.unit * 2,
 	},
@@ -119,6 +123,7 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										在线人数
 									</Typography>
+									<CircularProgress className={classes.progressbg} variant="static" color="inherit" value="100" size={80} />
 									<CircularProgress className={classes.progress} variant="static" max={this.state.players ? this.state.players.max : 1} value={this.state.players ? this.state.players.online : 1} size={80} />
 									<Typography variant="headline" component="h2">
 										{this.state.players ? this.state.players.online : "?"}/{this.state.players ? this.state.players.max : "?"}
@@ -168,6 +173,7 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										内存使用率
 									</Typography>
+									<CircularProgress className={classes.progressbg} variant="static" color="inherit" value="100" size={80} />
 									<CircularProgress className={classes.progress} variant="static" value={67} size={80} />
 									<Typography variant="headline" component="h2">
 										67%
@@ -179,6 +185,7 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										CPU使用率
 									</Typography>
+									<CircularProgress className={classes.progressbg} variant="static" color="inherit" value="100" size={80} />
 									<CircularProgress className={classes.progress} variant="static" value={75} size={80} />
 									<Typography variant="headline" component="h2">
 										75%
