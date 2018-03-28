@@ -186,7 +186,6 @@ static struct mon_monitor_t players_monitors[] = {
 
 static void players_reset()
 {
-	cmd_printf(CLR_MESSAGE, "%s\n", __func__);
 	data.cnt = data.max = 0;
 	while (data.player) {
 		void *p = data.player;

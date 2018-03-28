@@ -11,8 +11,8 @@
 #include "players.h"
 
 static struct {
-	time_t schedule;
-} data = {(time_t)-1};
+	time_t schedule, last;
+} data = {(time_t)-1, (time_t)-1};
 
 static void backup_save(struct monitor_t *mp, const char *str);
 
@@ -74,6 +74,8 @@ static void backup_save(struct monitor_t *mp, const char *str)
 		backup_schedule();
 	// Disable callback
 ret:	monitor_enable(backup_monitors[0].mon, 0);
+	if (!ret)
+		data.last = time(NULL);
 }
 
 void backup_now()
@@ -128,6 +130,9 @@ static struct json_object *backup_json(struct json_object *act)
 		json_object_object_add(obj, "status",
 				json_object_new_string("idle"));
 	}
+	if (data.last != (time_t)-1)
+		json_object_object_add(obj, "last",
+				json_object_new_int64(data.last));
 	return obj;
 }
 
