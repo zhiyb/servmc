@@ -159,7 +159,7 @@ class App extends Component {
               <MenuIcon />
             </IconButton>
             <Typography variant="title" color="inherit" noWrap className={classes.flex}>
-              ServMC控制台
+              ServMC - {this.state.page.title}
             </Typography>
               <IconButton
                 aria-owns={Boolean(this.state.anchorEl) ? 'menu-appbar' : null}
