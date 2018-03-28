@@ -25,64 +25,61 @@ const styles = theme => ({
 	textField: {
 		flexBasis: 200,
 	},
-	root: theme.mixins.gutters({
-		paddingTop: 16,
-		paddingBottom: 16,
-		marginTop: theme.spacing.unit * 3,
-
-		height: "60vh",
-		overflow: "auto",
-	}),
+	pager: {
+		padding: 0,
+	},
 });
 
-function colourd(s) {
-	var bold = false, colour = null;
-	s = s.replace(/\033\[([0-9;]+)m/g, function (esc, clr) {
-		var res = clr.match(/[0-9]+/g);
-		for (var i in res) {
-			var c = parseInt(res[i], 10);
-			if (c === 1)
-				bold = true;
-			else
-				colour = c;
-		}
-		return "";
-	});
-	switch (colour) {
-		case 30: colour = "#fff"; break;
-		case 31: colour = "#bb0000"; break;
-		case 32: colour = "#00bb00"; break;
-		case 33: colour = "#bbbb00"; break;
-		case 34: colour = "#0000bb"; break;
-		case 35: colour = "#bb00bb"; break;
-		case 36: colour = "#00bbbb"; break;
-		case 37: colour = "#bbbbbb"; break;
-		case 90: colour = "#555555"; break;
-		case 91: colour = "#ff5555"; break;
-		case 92: colour = "#55ff55"; break;
-		case 93: colour = "#ffff55"; break;
-		case 94: colour = "#5555ff"; break;
-		case 95: colour = "#ff55ff"; break;
-		case 96: colour = "#55ffff"; break;
-		case 97: colour = "#000"; break;
-		default: colour = null; break;
-	}
-	var e = document.createElement("span");
-	e.innerText = s;
-	if (bold === true)
-		e.style["font-weight"] = "bold";
-	if (colour !== null)
-		e.style["color"] = colour;
-	return e.outerHTML;
-}
-
-function append(s) {
-	var msgs = document.getElementById("msgs");
-	msgs.insertAdjacentHTML("beforeend", colourd(s).replace(/\n/g, "<br>"));
-	msgs.scrollTop = msgs.scrollHeight;
-}
-
 class console extends Component {
+	msgs = null;
+	msgsScroll = null;
+
+	msgsAppend = str => {
+		if(this.msgs)this.msgs.insertAdjacentHTML("beforeend", this.colourd(str).replace(/\n/g, "<br>"));
+		if(this.msgsScroll)this.msgsScroll.scrollTop = this.msgsScroll.scrollHeight;
+	};
+
+	colourd = str => {
+		let bold = false, colour = null;
+		str = str.replace(/\033\[([0-9;]+)m/g, function (esc, clr) {
+			let res = clr.match(/[0-9]+/g);
+			for (let i in res) {
+				let c = parseInt(res[i], 10);
+				if (c === 1)
+					bold = true;
+				else
+					colour = c;
+			}
+			return "";
+		});
+		switch (colour) {
+			case 30: colour = "#fff"; break;
+			case 31: colour = "#bb0000"; break;
+			case 32: colour = "#00bb00"; break;
+			case 33: colour = "#bbbb00"; break;
+			case 34: colour = "#0000bb"; break;
+			case 35: colour = "#bb00bb"; break;
+			case 36: colour = "#00bbbb"; break;
+			case 37: colour = "#bbbbbb"; break;
+			case 90: colour = "#555555"; break;
+			case 91: colour = "#ff5555"; break;
+			case 92: colour = "#55ff55"; break;
+			case 93: colour = "#ffff55"; break;
+			case 94: colour = "#5555ff"; break;
+			case 95: colour = "#ff55ff"; break;
+			case 96: colour = "#55ffff"; break;
+			case 97: colour = "#000"; break;
+			default: colour = null; break;
+		}
+		let e = document.createElement("span");
+		e.innerText = str;
+		if (bold === true)
+			e.style["font-weight"] = "bold";
+		if (colour !== null)
+			e.style["color"] = colour;
+		return e.outerHTML;
+	}
+
 	state = {
 
 	};
@@ -94,9 +91,9 @@ class console extends Component {
 		else
 			url = "ws://" + window.location.hostname + ":" + window.location.port;
 		this.ws = new WebSocket(url, "web-console");
-		this.ws.onopen = function () { append("WebSocket connected\n"); }
-		this.ws.onclose = function () { append("WebSocket disconnected\n"); }
-		this.ws.onmessage = function (msg) { append(msg.data); }
+		this.ws.onopen = () => { this.msgsAppend("WebSocket connected\n"); }
+		this.ws.onclose = () => { this.msgsAppend("WebSocket disconnected\n"); }
+		this.ws.onmessage = (msg) => { this.msgsAppend(msg.data); }
 	}
 
 	render() {
@@ -104,8 +101,10 @@ class console extends Component {
 
 		return (
 			<div id="console">
-				<Paper className={classes.root} elevation={4}>
-					<div id="msgs"></div>
+				<Paper className={classes.pager} elevation={4}>
+					<div className="msgsScroll" ref={msgsScroll => { this.msgsScroll = msgsScroll; }}>
+						<div className="msgs" ref={msgs => { this.msgs = msgs; }}></div>
+					</div>
 				</Paper>
 				<FormControl fullWidth className={classes.margin}>
 					<InputLabel htmlFor="command">servmc></InputLabel>
@@ -114,7 +113,7 @@ class console extends Component {
 						onKeyUp={event => {
 							if (event.keyCode === 13) {
 								this.ws.send(event.target.value);
-								event.target.value = "";
+								event.target.value = "";	//清空文本框
 							}
 						}}
 					/>
