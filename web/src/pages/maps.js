@@ -29,11 +29,14 @@ class maps extends Component {
 	draw = () => {
 		if (this.canvas) {
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
-			for (let x = 0; x < 100; x++)for (let y = 0; y < 100; y++) {
+			for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale); y++) {
 				this.canvasContext.drawImage(
 					this.getblock(x, y),
 					0, 0, 16, 16,
-					this.canvas.width / 2 + (x - 0.5 + this.mapPositionX) * 16 * this.mapScale, this.canvas.height / 2 + (y - 0.5 + this.mapPositionY) * 16 * this.mapScale, 16 * this.mapScale, 16 * this.mapScale);
+					this.canvas.width / 2 + (x - 0.5 + this.mapPositionX) * 16 * this.mapScale,
+					this.canvas.height / 2 + (y - 0.5 + this.mapPositionY) * 16 * this.mapScale,
+					16 * this.mapScale,
+					16 * this.mapScale);
 			}
 		}
 	}
