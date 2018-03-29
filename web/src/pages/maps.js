@@ -11,6 +11,8 @@ class maps extends Component {
 	canvasContext = null;
 	images = {};
 
+	canvasMouseDownPos = null;
+
 	mapScale = 1;
 	mapPositionX = 0;
 	mapPositionY = 0;
@@ -41,10 +43,12 @@ class maps extends Component {
 
 	zoomIn = () => {
 		this.mapScale *= 1.2;
+		this.draw();
 	}
 
 	zoomOut = () => {
 		this.mapScale /= 1.2
+		this.draw();
 	}
 
 	componentDidMount() {
@@ -59,14 +63,13 @@ class maps extends Component {
 				<button onClick={this.draw}>draw</button>
 				<button onClick={this.zoomIn}>+</button>
 				<button onClick={this.zoomOut}>-</button>
-				<button onClick={() => this.mapPositionX -= 1}>{"<"}</button>
-				<button onClick={() => this.mapPositionX += 1}>{">"}</button>
-				<button onClick={() => this.mapPositionY -= 1}>^</button>
-				<button onClick={() => this.mapPositionY += 1}>v</button>
 				<br />
 				<canvas
 					className="canvas"
 					ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
+					onMouseDown={event => { this.canvasMouseDownPos = [this.mapPositionX - event.clientX / 16 / this.mapScale, this.mapPositionY - event.clientY / 16 / this.mapScale] }}
+					onMouseMove={event => { if (this.canvasMouseDownPos) { this.mapPositionX = this.canvasMouseDownPos[0] + event.clientX / 16 / this.mapScale; this.mapPositionY = this.canvasMouseDownPos[1] + event.clientY / 16 / this.mapScale; this.draw(); } }}
+					onMouseUp={event => { this.canvasMouseDownPos = null }}
 					height="1000px"
 					width="1000px"
 				></canvas>
