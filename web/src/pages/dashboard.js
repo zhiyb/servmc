@@ -42,6 +42,7 @@ class dashboard extends Component {
 		players: undefined,
 		backup: undefined,
 		restart: undefined,
+		system: undefined,
 	};
 
 	update = () => {
@@ -56,6 +57,9 @@ class dashboard extends Component {
 		});
 		query({ "action": "query", "type": "restart" }).then((ret) => {
 			this.setState({ restart: ret })
+		});
+		query({ "action": "query", "type": "system" }).then((ret) => {
+			this.setState({ system: ret })
 		});
 		this.updateTimer = setTimeout(this.update, 3000);
 	}
@@ -241,10 +245,19 @@ class dashboard extends Component {
 									<Typography className={classes.title} color="textSecondary">
 										CPU使用率
 									</Typography>
-									<CircularProgress className={classes.progressbg} variant="static" color="inherit" value="100" size={80} />
-									<CircularProgress className={classes.progress} variant="static" value={75} size={80} />
 									<Typography variant="headline" component="h2">
-										75%
+										{
+											this.state.system ?
+											this.state.system.cpus ?
+											this.state.system.cpus.map((value, index) => {
+												if (value[0] === "cpu")
+													return "CPU:" + Math.round(value[2] / value[1]) + "%";
+												else
+													return "核心" + index + ":" + Math.round(value[2] / value[1]) + "%";
+											}) :
+											"等待中……" :
+											"查询中……"
+										}
 									</Typography>
 								</Paper>
 							</Grid>
