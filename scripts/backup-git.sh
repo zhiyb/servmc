@@ -14,7 +14,7 @@ if [ ! -e .git ]; then
 	git config core.compression 9
 fi
 
-time="$(date -Iseconds)"
+time="$(date +%Y-%m-%dT%H:%M:%S%z)"
 msg="$world $time $ver"
 echo "Backup as: $msg"
 
