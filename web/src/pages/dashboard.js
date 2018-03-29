@@ -84,6 +84,18 @@ class dashboard extends Component {
 							<Grid item>
 								<Paper className={classes.paper1}>
 									<Typography className={classes.title} color="textSecondary">
+										服务器事件
+								</Typography>
+									<pre>
+										10:01:00 备份完毕
+									<br />
+										10:02:02 警告信息
+								</pre>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper1}>
+									<Typography className={classes.title} color="textSecondary">
 										玩家事件
 									</Typography>
 									<pre>
