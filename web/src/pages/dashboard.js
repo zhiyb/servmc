@@ -137,8 +137,8 @@ class dashboard extends Component {
 											this.state.restart.status === "stopped" ? "已停止" :
 											this.state.restart.status === "starting" ? "正在启动" :
 											this.state.restart.status === "running" ? "运行中" :
-											this.state.restart.status === "pending" ? "pending" :
-											this.state.restart.status === "scheduled" ? "scheduled" + Date(this.state.restart.time).toString() :
+											this.state.restart.status === "pending" ? "即将重启" :
+											this.state.restart.status === "scheduled" ? "重启已计划：" + Date(this.state.restart.time).toString() :
 											this.state.restart.status :
 											"查询中……"
 										}
