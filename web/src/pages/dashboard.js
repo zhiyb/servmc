@@ -39,6 +39,7 @@ class dashboard extends Component {
 	state = {
 		version: undefined,
 		players: undefined,
+		backup: undefined,
 		restart: undefined,
 	};
 
@@ -48,6 +49,9 @@ class dashboard extends Component {
 		});
 		query({ "action": "query", "type": "players" }).then((ret) => {
 			this.setState({ players: ret })
+		});
+		query({ "action": "query", "type": "backup" }).then((ret) => {
+			this.setState({ backup: ret })
 		});
 		query({ "action": "query", "type": "restart" }).then((ret) => {
 			this.setState({ restart: ret })
@@ -134,7 +138,7 @@ class dashboard extends Component {
 											this.state.restart.status === "starting" ? "正在启动" :
 											this.state.restart.status === "running" ? "运行中" :
 											this.state.restart.status === "pending" ? "pending" :
-											this.state.restart.status === "scheduled" ? "scheduled" + new Date(this.state.restart.time).toString() :
+											this.state.restart.status === "scheduled" ? "scheduled" + Date(this.state.restart.time).toString() :
 											this.state.restart.status :
 											"查询中……"
 										}
@@ -156,10 +160,26 @@ class dashboard extends Component {
 							<Grid item>
 								<Paper className={classes.paper}>
 									<Typography className={classes.title} color="textSecondary">
-										备份状态
+										定时备份状态
 									</Typography>
 									<Typography variant="headline" component="h2">
-										最后备份于<br />xxxx
+										{
+											this.state.backup ?
+											this.state.backup.status === "idle" ? "空闲" :
+											this.state.backup.status === "scheduled" ? "计划备份：" + Date(this.state.backup.time).toString() :
+											this.state.backup.status === "active" ? "正在进行备份" :
+											this.state.backup.status :
+											"查询中……"
+										}
+									</Typography>
+          							<br />
+									<Typography className={classes.title} color="textSecondary">
+										最后备份于
+									</Typography>
+									<Typography variant="headline" component="h2">
+										{
+											this.state.backup ? Date(this.state.backup.last).toString() : "查询中……"
+										}
 									</Typography>
 								</Paper>
 							</Grid>
