@@ -16,14 +16,12 @@ class maps extends Component {
 	mapPositionY = 0;
 
 	getblock = (x, y) => {
-		switch (Math.round(Math.random() * 10)) {		//目前为随机，未来将会改为实际的获取
-			case 1:
-				return this.images.diamond_ore;
-			case 2:
-				return this.images.emerald_ore;
-			default:
-				return this.images.stone;
-		}
+		if (x % 10 === 0)
+			return this.images.diamond_ore;
+		else if (y % 10 === 0)
+			return this.images.emerald_ore;
+		else
+			return this.images.stone;
 	}
 
 	draw = () => {
