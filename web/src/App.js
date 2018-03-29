@@ -18,11 +18,13 @@ import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import IconDashboard from 'material-ui-icons/Dashboard';
 import IconServer from 'material-ui-icons/Dns';
 import IconBackup from 'material-ui-icons/Restore';
+import IconMaps from 'material-ui-icons/Map';
 import IconConsole from 'material-ui-icons/CallToAction';
 import IconCode from 'material-ui-icons/Code';
 import PageDashboard from './pages/dashboard';
 import PageServer from './pages/server';
 import PageBackup from './pages/backup';
+import PageMaps from './pages/maps';
 import PageConsole from './pages/console';
 
 import './App.css';
@@ -114,6 +116,12 @@ const pages = [
     title: "备份管理",
     icon: <IconBackup />,
     body: <PageBackup />,
+  },
+  {
+    name: "maps",
+    title: "世界地图",
+    icon: <IconMaps />,
+    body: <PageMaps />,
   },
   {
     name: "console",
