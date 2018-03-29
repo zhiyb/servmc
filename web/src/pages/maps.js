@@ -12,6 +12,8 @@ class maps extends Component {
 	images = {};
 
 	mapScale = 1;
+	mapPositionX = 0;
+	mapPositionY = 0;
 
 	getblock = (x, y) => {
 		switch (Math.round(Math.random() * 10)) {		//目前为随机，未来将会改为实际的获取
@@ -28,17 +30,20 @@ class maps extends Component {
 		if (this.canvas) {
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
 			for (let x = 0; x < 100; x++)for (let y = 0; y < 100; y++) {
-				this.canvasContext.drawImage(this.getblock(x, y), 0, 0, 16, 16, x * 16 * this.mapScale, y * 16 * this.mapScale, 16 * this.mapScale, 16 * this.mapScale);
+				this.canvasContext.drawImage(
+					this.getblock(x, y),
+					0, 0, 16, 16,
+					this.canvas.width / 2 + (x - 0.5 + this.mapPositionX) * 16 * this.mapScale, this.canvas.height / 2 + (y - 0.5 + this.mapPositionY) * 16 * this.mapScale, 16 * this.mapScale, 16 * this.mapScale);
 			}
 		}
 	}
 
 	zoomIn = () => {
-		this.mapScale *= 1.1;
+		this.mapScale *= 1.2;
 	}
 
 	zoomOut = () => {
-		this.mapScale /= 1.1
+		this.mapScale /= 1.2
 	}
 
 	componentDidMount() {
@@ -53,6 +58,10 @@ class maps extends Component {
 				<button onClick={this.draw}>draw</button>
 				<button onClick={this.zoomIn}>+</button>
 				<button onClick={this.zoomOut}>-</button>
+				<button onClick={() => this.mapPositionX -= 1}>{"<"}</button>
+				<button onClick={() => this.mapPositionX += 1}>{">"}</button>
+				<button onClick={() => this.mapPositionY -= 1}>^</button>
+				<button onClick={() => this.mapPositionY += 1}>v</button>
 				<br />
 				<canvas
 					className="canvas"
