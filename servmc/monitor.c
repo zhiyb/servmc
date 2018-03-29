@@ -25,11 +25,13 @@ static struct {
 extern struct mon_module_t mon_players;
 extern struct mon_module_t mon_backup;
 extern struct mon_module_t mon_restart;
+extern struct mon_module_t mon_system;
 
 static struct mon_module_t *modules[] = {
 	&mon_players,
 	&mon_backup,
 	&mon_restart,
+	&mon_system,
 };
 
 struct monitor_t *monitor_install(const char *regex, monitor_func_t func)
