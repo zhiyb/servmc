@@ -21,6 +21,12 @@ static struct {
 			unsigned long total;
 			char name[];
 		} *cpu;
+		struct stat_mem_t {
+			unsigned long total, free, avail, cached;
+			struct {
+				unsigned long total, free;
+			} swap;
+		} mem;
 	} * volatile prev, * volatile now, *buf;
 	pthread_mutex_t lock;
 	time_t schedule;
@@ -71,33 +77,20 @@ static int system_perf_cpu(struct stat_t *stat)
 		*cpp = (*cpp)->next;
 		free(p);
 	}
+	fclose(fp);
 
 	// Process CPU usage
 	return 0;
 }
 
-static void system_perf_free(struct stat_t *stat)
+static void system_perf_cpu_print()
 {
-	if (!stat)
-		return;
-	struct stat_cpu_t *cp = stat->cpu;
-	while (cp) {
-		struct stat_cpu_t *p = cp;
-		cp = cp->next;
-		free(p);
-	}
-	free(stat);
-}
-
-static void system_perf_print()
-{
-#if 0
-	// CPU usage
+#if USAGE_CPU
 	struct stat_cpu_t *cpp = data.prev->cpu;
 	struct stat_cpu_t *cnp = data.now->cpu;
 	while (cpp && cnp) {
 		static const char *desc[] = {
-			"us", "sy", "ni", "id", "wa", "hi", "si", "st"};
+			"us", "ni", "sy", "id", "wa", "hi", "si", "st"};
 		unsigned long dt = cnp->total - cpp->total;
 		char str[128], *p = str;
 #if 1
@@ -126,6 +119,78 @@ static void system_perf_print()
 #endif
 }
 
+static int system_perf_mem(struct stat_t *stat)
+{
+	FILE *fp = fopen("/proc/meminfo", "r");
+	if (!fp)
+		return -1;
+
+	struct stat_mem_t *mp = &stat->mem;
+	char buf[128];
+	while (fgets(buf, sizeof(buf), fp)) {
+		static const char *delim = " :";
+		char *save;
+		const char *name = strtok_r(buf, delim, &save);
+		unsigned long value = strtoul(strtok_r(NULL, delim, &save),
+				NULL, 10);
+		if (strcmp(name, "MemTotal") == 0)
+			mp->total = value;
+		else if (strcmp(name, "MemFree") == 0)
+			mp->free = value;
+		else if (strcmp(name, "MemAvailable") == 0)
+			mp->avail = value;
+		else if (strcmp(name, "Buffers") == 0)
+			mp->cached = mp->cached == (unsigned long)-1 ?
+				value : mp->cached + value;
+		else if (strcmp(name, "Cached") == 0)
+			mp->cached = mp->cached == (unsigned long)-1 ?
+				value : mp->cached + value;
+		else if (strcmp(name, "SwapTotal") == 0)
+			mp->swap.total = value;
+		else if (strcmp(name, "SwapFree") == 0)
+			mp->swap.free = value;
+	}
+	fclose(fp);
+	return 0;
+}
+
+static void system_perf_mem_print()
+{
+#if USAGE_MEM
+#if 1
+	struct stat_mem_t *mp = &data.now->mem;
+	cmd_printf(CLR_MESSAGE, "%s: mem total %ld, free %0.1f%%, "
+			"cached %0.1f%%, avail %0.1f%%\n", __func__,
+			mp->total, (float)mp->free / (float)mp->total * 100.0,
+			(float)mp->cached / (float)mp->total * 100.0,
+			(float)mp->avail / (float)mp->total * 100.0);
+	cmd_printf(CLR_MESSAGE, "%s: swap total %ld, free %0.1f%%\n",
+			__func__, mp->swap.total,
+			(float)mp->swap.free / (float)mp->swap.total * 100.0);
+#else
+	struct stat_mem_t *mp = &data.now->mem;
+	cmd_printf(CLR_MESSAGE, "%s: mem total %ld, free %ld, "
+			"cached %ld, avail %ld\n", __func__,
+			mp->total, mp->free, mp->cached, mp->avail);
+	cmd_printf(CLR_MESSAGE, "%s: swap total %ld, free %ld\n",
+			__func__, mp->swap.total, mp->swap.free);
+#endif
+#endif
+}
+
+static void system_perf_free(struct stat_t *stat)
+{
+	if (!stat)
+		return;
+	struct stat_cpu_t *cp = stat->cpu;
+	while (cp) {
+		struct stat_cpu_t *p = cp;
+		cp = cp->next;
+		free(p);
+	}
+	free(stat);
+}
+
 static void system_perf()
 {
 	data.schedule = time(NULL) + SYSTEM_INTERVAL;
@@ -133,8 +198,10 @@ static void system_perf()
 	if (!stat) {
 		stat = malloc(sizeof(struct stat_t));
 		stat->cpu = NULL;
+		memset(&stat->mem, 0, sizeof(stat->mem));
 	}
 	system_perf_cpu(stat);
+	system_perf_mem(stat);
 
 	// Triple-buffering for calculating differences
 	pthread_mutex_lock(&data.lock);
@@ -144,7 +211,8 @@ static void system_perf()
 	pthread_mutex_unlock(&data.lock);
 
 	if (data.prev)
-		system_perf_print();
+		system_perf_cpu_print();
+	system_perf_mem_print();
 }
 
 void system_init()
@@ -181,19 +249,20 @@ static struct json_object *system_json(struct json_object *act)
 	if (json_object_object_get_ex(act, "detailed", &detailedobj))
 		detailed = json_object_get_boolean(detailedobj);
 
-	// CPU information may not be available during startup
-	if (!data.prev)
-		return obj;
+	struct json_object *cpus = NULL;
+	struct json_object *mem = NULL;
+	struct json_object *swap = NULL;
 
-	// CPU array
-	struct json_object *cpus = json_object_new_array();
 	pthread_mutex_lock(&data.lock);
-	if (!data.prev) {
-		pthread_mutex_unlock(&data.lock);
-		return obj;
-	}
 	struct stat_cpu_t *cpp = data.prev->cpu;
 	struct stat_cpu_t *cnp = data.now->cpu;
+	struct stat_mem_t *mp = &data.now->mem;
+
+	// CPU information may not be available during startup
+	if (!data.prev)
+		goto mem;
+
+	// CPU array
 	while (cpp && cnp) {
 		struct json_object *cpu = json_object_new_array();
 		// name
@@ -215,13 +284,38 @@ static struct json_object *system_json(struct json_object *act)
 			}
 		}
 		// Append to array
+		if (!cpus)
+			cpus = json_object_new_array();
 		json_object_array_add(cpus, cpu);
 		cpp = cpp->next;
 		cnp = cnp->next;
 	}
-	pthread_mutex_unlock(&data.lock);
-	json_object_object_add(obj, "cpus", cpus);
 
+mem:	if (!mp->total)
+		goto swap;
+
+	mem = json_object_new_array();
+	json_object_array_add(mem, json_object_new_int64(mp->total));
+	json_object_array_add(mem, json_object_new_int64(mp->free));
+	json_object_array_add(mem, json_object_new_int64(mp->cached));
+	if (mp->avail != 0)
+		json_object_array_add(mem, json_object_new_int64(mp->avail));
+
+swap:	if (!mp->swap.total)
+		goto ret;
+
+	swap = json_object_new_array();
+	json_object_array_add(swap, json_object_new_int64(mp->swap.total));
+	json_object_array_add(swap, json_object_new_int64(mp->swap.free));
+
+ret:	pthread_mutex_unlock(&data.lock);
+
+	if (cpus)
+		json_object_object_add(obj, "cpus", cpus);
+	if (mem)
+		json_object_object_add(obj, "mem", mem);
+	if (swap)
+		json_object_object_add(obj, "swap", swap);
 	return obj;
 }
 
