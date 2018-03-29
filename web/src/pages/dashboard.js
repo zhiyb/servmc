@@ -39,6 +39,7 @@ class dashboard extends Component {
 	state = {
 		version: undefined,
 		players: undefined,
+		restart: undefined,
 	};
 
 	update = () => {
@@ -47,6 +48,9 @@ class dashboard extends Component {
 		});
 		query({ "action": "query", "type": "players" }).then((ret) => {
 			this.setState({ players: ret })
+		});
+		query({ "action": "query", "type": "restart" }).then((ret) => {
+			this.setState({ restart: ret })
 		});
 		this.updateTimer = setTimeout(this.update, 3000);
 	}
@@ -112,9 +116,28 @@ class dashboard extends Component {
 								<Paper className={classes.paper}>
 									<Typography className={classes.title} color="textSecondary">
 										服务器名
-									</Typography>
+								</Typography>
 									<Typography variant="headline" component="h2">
 										xxxx
+								</Typography>
+								</Paper>
+							</Grid>
+							<Grid item>
+								<Paper className={classes.paper}>
+									<Typography className={classes.title} color="textSecondary">
+										服务器状态
+									</Typography>
+									<Typography variant="headline" component="h2">
+										{
+											this.state.restart ?
+											this.state.restart.status === "stopped" ? "已停止" :
+											this.state.restart.status === "starting" ? "正在启动" :
+											this.state.restart.status === "running" ? "运行中" :
+											this.state.restart.status === "pending" ? "pending" :
+											this.state.restart.status === "scheduled" ? "scheduled" + new Date(this.state.restart.time).toString() :
+											this.state.restart.status :
+											"查询中……"
+										}
 									</Typography>
 								</Paper>
 							</Grid>
