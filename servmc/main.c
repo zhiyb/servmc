@@ -16,10 +16,12 @@
 #include "monitor.h"
 #include "config.h"
 #include "mon/backup.h"
+#include "mon/system.h"
 #include "mon/restart.h"
 
 void tick()
 {
+	system_tick(NULL);
 	backup_tick(NULL);
 	update_tick();
 	restart_tick(NULL);
@@ -31,6 +33,7 @@ int main(int argc, char *argv[])
 	cmd_init();
 	net_init();
 	mon_init();
+	system_init();
 
 	// Initial steps
 	update();
@@ -78,6 +81,7 @@ loop:	// Setup file descriptors
 quit:
 	exec_quit();
 	web_quit();
+	system_deinit();
 	mon_deinit();
 	cmd_quit();
 	return 0;

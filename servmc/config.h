@@ -1,13 +1,15 @@
 #pragma once
 
 // Event polling tick interval
-#define TICK_INTERVAL		10
+#define TICK_INTERVAL		5
 // Backup schedule interval
 #define BACKUP_INTERVAL		(1 * 60 * 60)
 // Update checking interval
 #define UPDATE_INTERVAL		(1 * 60 * 60)
 // Restart interval
 #define RESTART_INTERVAL	10
+// System statistics update interval
+#define SYSTEM_INTERVAL		5
 
 // Version configuration
 // snapshot / release
