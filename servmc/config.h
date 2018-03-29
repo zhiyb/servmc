@@ -26,6 +26,10 @@
 #define EXEC_BACKUP	"scripts/backup.sh"
 // Echo commands executed by management console
 #define ECHO_CMD	1
+// Print CPU usage
+#define	USAGE_CPU	0
+// Print memory usage
+#define USAGE_MEM	0
 // Web server port
 #define WEB_PORT	25580
 // Command line input prompt
