@@ -139,7 +139,7 @@ class dashboard extends Component {
 											this.state.restart.status === "starting" ? "正在启动" :
 											this.state.restart.status === "running" ? "运行中" :
 											this.state.restart.status === "pending" ? "即将重启" :
-											this.state.restart.status === "scheduled" ? "重启已计划：" + dateFormat((new Date(this.state.restart.time * 1000)), "yyyy-mm-dd HH:MM"):
+											this.state.restart.status === "scheduled" ? "重启已计划：" + dateFormat((new Date(this.state.restart.time * 1000)), "yyyy-mm-dd HH:MM:ss"):
 											this.state.restart.status :
 											"查询中……"
 										}
@@ -167,7 +167,7 @@ class dashboard extends Component {
 										{
 											this.state.backup ?
 											this.state.backup.status === "idle" ? "空闲" :
-											this.state.backup.status === "scheduled" ? "计划备份：" + dateFormat((new Date(this.state.backup.time * 1000)), "yyyy-mm-dd HH:MM"):
+											this.state.backup.status === "scheduled" ? "计划备份：" + dateFormat((new Date(this.state.backup.time * 1000)), "yyyy-mm-dd HH:MM:ss"):
 											this.state.backup.status === "active" ? "正在进行备份" :
 											this.state.backup.status :
 											"查询中……"
@@ -179,7 +179,7 @@ class dashboard extends Component {
 									</Typography>
 									<Typography variant="headline" component="h2">
 										{
-											this.state.backup ? this.state.backup.last ? dateFormat((new Date(this.state.backup.last * 1000)), "yyyy-mm-dd HH:MM") : "未进行备份" : "查询中……"
+											this.state.backup ? this.state.backup.last ? dateFormat((new Date(this.state.backup.last * 1000)), "yyyy-mm-dd HH:MM:ss") : "未进行备份" : "查询中……"
 										}
 									</Typography>
 								</Paper>
