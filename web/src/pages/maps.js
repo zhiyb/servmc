@@ -24,16 +24,16 @@ class maps extends Component {
 	mapWheelTimer = null;
 
 	getBlock = (x, y) => {
-		if (x % 10 === 0)
+		if (x % 16 === 0)
 			return this.images.diamond_ore;
-		else if (y % 10 === 0)
+		else if (y % 16 === 0)
 			return this.images.emerald_ore;
 		else
 			return this.images.stone;
 	}
 
 	getChunk = (x, y, s) => {
-
+		
 	}
 
 	draw = () => {
@@ -54,8 +54,8 @@ class maps extends Component {
 					this.canvasContext.drawImage(
 						this.getBlock(x, y),
 						0, 0, 16, 16,
-						this.canvas.width / 2 + (x - 0.5 + this.mapPosition[0]) * 16 * this.mapScale,
-						this.canvas.height / 2 + (y - 0.5 + this.mapPosition[1]) * 16 * this.mapScale,
+						this.canvas.width / 2 + (x + this.mapPosition[0]) * 16 * this.mapScale,
+						this.canvas.height / 2 + (y + this.mapPosition[1]) * 16 * this.mapScale,
 						16 * this.mapScale,
 						16 * this.mapScale);
 				}
