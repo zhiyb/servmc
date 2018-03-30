@@ -7,6 +7,9 @@ import cobblestone from './maps/cobblestone.png'
 import dirt from './maps/dirt.png'
 import cobblestone_mossy from './maps/cobblestone_mossy.png'
 import grass_path_top from './maps/grass_path_top.png'
+import c1_0 from './maps/chunk-test/c1_0.png'
+import c1_1 from './maps/chunk-test/c1_1.png'
+import c2_0 from './maps/chunk-test/c2_0.png'
 
 import './maps.css';
 
@@ -42,7 +45,15 @@ class maps extends Component {
 	}
 
 	getChunk = (x, y, s) => {
-
+		if (s === 1) {
+			if (Math.abs(x % 2) - Math.abs(y % 2) === 0)
+				return this.images.c1_0;
+			else
+				return this.images.c1_1;
+		}
+		else {
+			return this.images.c2_0;
+		}
 	}
 
 	draw = () => {
@@ -58,16 +69,65 @@ class maps extends Component {
 			this.mapWheelTimer = null;
 
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
-			if (this.mapScale > 0.5) {
-				for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y++) {
-					this.canvasContext.drawImage(
-						this.getBlock(x, y),
-						0, 0, 16, 16,
-						this.canvas.width / 2 + (x + this.mapPosition[0]) * 16 * this.mapScale,
-						this.canvas.height / 2 + (y + this.mapPosition[1]) * 16 * this.mapScale,
-						16 * this.mapScale,
-						16 * this.mapScale);
-				}
+			if (this.mapScale > 1/2) {
+				for (
+					let x = Math.floor(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]);
+					x <= Math.floor(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]);
+					x++
+				)
+					for (
+						let y = Math.floor(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]);
+						y <= Math.floor(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]);
+						y++
+					) {
+						this.canvasContext.drawImage(
+							this.getBlock(x, y),
+							0, 0, 16, 16,
+							this.canvas.width / 2 + (x + this.mapPosition[0]) * 16 * this.mapScale,
+							this.canvas.height / 2 + (y + this.mapPosition[1]) * 16 * this.mapScale,
+							16 * this.mapScale,
+							16 * this.mapScale);
+					}
+			}
+			else if (this.mapScale > 1/16/2) {
+				for (
+					let x = Math.floor((- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0])/16);
+					x <= Math.floor((this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0])/16);
+					x++
+				)
+					for (
+						let y = Math.floor((- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1])/16);
+						y <= Math.floor((this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1])/16);
+						y++
+					) {
+						this.canvasContext.drawImage(
+							this.getChunk(x, y, 1),
+							0, 0, 16, 16,
+							this.canvas.width / 2 + (x*16 + this.mapPosition[0]) * 16 * this.mapScale,
+							this.canvas.height / 2 + (y*16 + this.mapPosition[1]) * 16 * this.mapScale,
+							16 * this.mapScale *16,
+							16 * this.mapScale *16);
+					}
+			}
+			else  if (this.mapScale > 1/16/16/2) {
+				for (
+					let x = Math.floor((- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0])/16/16);
+					x <= Math.floor((this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0])/16/16);
+					x++
+				)
+					for (
+						let y = Math.floor((- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1])/16/16);
+						y <= Math.floor((this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1])/16/16);
+						y++
+					) {
+						this.canvasContext.drawImage(
+							this.getChunk(x, y, 2),
+							0, 0, 16, 16,
+							this.canvas.width / 2 + (x*16*16 + this.mapPosition[0]) * 16 * this.mapScale,
+							this.canvas.height / 2 + (y*16*16 + this.mapPosition[1]) * 16 * this.mapScale,
+							16 * this.mapScale *16*16,
+							16 * this.mapScale *16*16);
+					}
 			}
 		}
 	}
@@ -80,6 +140,9 @@ class maps extends Component {
 		(this.images.dirt = new Image()).src = dirt;
 		(this.images.cobblestone_mossy = new Image()).src = cobblestone_mossy;
 		(this.images.grass_path_top = new Image()).src = grass_path_top;
+		(this.images.c1_0 = new Image()).src = c1_0;
+		(this.images.c1_1 = new Image()).src = c1_1;
+		(this.images.c2_0 = new Image()).src = c2_0;
 	}
 
 	handleMouseDown = event => {
@@ -108,7 +171,7 @@ class maps extends Component {
 		this.mapWheelTimer = setTimeout(this.draw, 200);	//滚动停止后0.2s才重新渲染
 
 		let mapScaleNew = this.mapScale * this.state.mapWheelScale * (1 + event.deltaY / 500);
-		if (mapScaleNew < 100 && mapScaleNew > 0.125) {
+		if (mapScaleNew < 100 && mapScaleNew > 1/16/16) {
 			this.setState({ mapWheelScale: this.state.mapWheelScale * (1 + event.deltaY / 500) });
 		}
 	}
