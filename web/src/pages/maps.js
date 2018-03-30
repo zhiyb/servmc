@@ -91,8 +91,8 @@ class maps extends Component {
 						onMouseUp={event => {
 							if (this.canvasMouseDownPos) {
 								event.preventDefault();
-								this.mapPosition[0] += (event.clientX - this.canvasMouseDownPos[0]) / 16 / this.mapScale;
-								this.mapPosition[1] += (event.clientY - this.canvasMouseDownPos[1]) / 16 / this.mapScale; this.canvasMouseDownPos = null; this.draw();
+								this.mapPosition[0] += this.state.mapMouseMove[0] / 16 / this.mapScale;
+								this.mapPosition[1] += this.state.mapMouseMove[1] / 16 / this.mapScale; this.canvasMouseDownPos = null; this.draw();
 							}
 						}}
 						height={this.state.mapSize[0] * 3}
