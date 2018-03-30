@@ -34,26 +34,18 @@ class maps extends Component {
 		if (this.canvas) {
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
 			this.setState({ mapMouseMove: [0, 0] });
-			for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y++) {
-				this.canvasContext.drawImage(
-					this.getblock(x, y),
-					0, 0, 16, 16,
-					this.canvas.width / 2 + (x - 0.5 + this.mapPosition[0]) * 16 * this.mapScale,
-					this.canvas.height / 2 + (y - 0.5 + this.mapPosition[1]) * 16 * this.mapScale,
-					16 * this.mapScale,
-					16 * this.mapScale);
+			if (this.mapScale > 0.5) {
+				for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y++) {
+					this.canvasContext.drawImage(
+						this.getblock(x, y),
+						0, 0, 16, 16,
+						this.canvas.width / 2 + (x - 0.5 + this.mapPosition[0]) * 16 * this.mapScale,
+						this.canvas.height / 2 + (y - 0.5 + this.mapPosition[1]) * 16 * this.mapScale,
+						16 * this.mapScale,
+						16 * this.mapScale);
+				}
 			}
 		}
-	}
-
-	zoomIn = () => {
-		this.mapScale *= 1.2;
-		this.draw();
-	}
-
-	zoomOut = () => {
-		this.mapScale /= 1.2
-		this.draw();
 	}
 
 	componentDidMount() {
@@ -84,18 +76,25 @@ class maps extends Component {
 		}
 	}
 
+	handleWheel = event => {
+		let mapScaleNew = this.mapScale * 1 + event.deltaY / 100;
+		if (mapScaleNew < 100 && mapScaleNew > 0.125) {
+			this.mapScale = mapScaleNew;
+			this.draw();
+		}
+	}
+
 	render() {
 		return (
 			<div>
 				<button onClick={this.draw}>draw</button>
-				<button onClick={this.zoomIn}>+</button>
-				<button onClick={this.zoomOut}>-</button>
 				<br />
 				<div className="map" style={{ height: this.state.mapSize[0], width: this.state.mapSize[1] }}
 					onMouseDown={this.handleMouseDown}
 					onMouseMove={this.handleMouseMove}
 					onMouseUp={this.handleMouseUp}
 					onMouseOut={this.handleMouseUp}
+					onWheel={this.handleWheel}
 				>
 					<canvas
 						className="canvas"
