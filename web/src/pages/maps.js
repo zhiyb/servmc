@@ -69,10 +69,7 @@ class maps extends Component {
 				<button onClick={this.zoomIn}>+</button>
 				<button onClick={this.zoomOut}>-</button>
 				<br />
-				<div className="map" style={{ height: this.state.mapSize[0], width: this.state.mapSize[1] }}>
-					<canvas
-						className="canvas"
-						ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
+				<div className="map" style={{ height: this.state.mapSize[0], width: this.state.mapSize[1] }}
 						onMouseDown={event => {
 							event.preventDefault();
 							this.canvasMouseDownPos = [event.clientX, event.clientY];
@@ -94,7 +91,10 @@ class maps extends Component {
 								this.mapPosition[0] += this.state.mapMouseMove[0] / 16 / this.mapScale;
 								this.mapPosition[1] += this.state.mapMouseMove[1] / 16 / this.mapScale; this.canvasMouseDownPos = null; this.draw();
 							}
-						}}
+						}}>
+					<canvas
+						className="canvas"
+						ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
 						height={this.state.mapSize[0] * 3}
 						width={this.state.mapSize[1] * 3}
 						style={{ left: -this.state.mapSize[0] + this.state.mapMouseMove[0], top: -this.state.mapSize[1] + this.state.mapMouseMove[1] }}
