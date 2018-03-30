@@ -30,3 +30,7 @@ www:
 clean-web distclean-web: %-web:
 	$(MAKE) -C web $*
 	rm -f www
+
+.PHONY: development-web
+development-web: %-web:
+	$(MAKE) -C web $*

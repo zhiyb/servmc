@@ -17,3 +17,8 @@ clean:
 .PHONY: distclean
 distclean: clean
 	rm -rf node_modules
+
+.PHONY: development
+development: node_modules
+	npm start
+	
