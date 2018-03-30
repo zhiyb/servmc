@@ -10,16 +10,18 @@ class maps extends Component {
 	state = {
 		mapSize: [1000, 1000],
 		mapMouseMove: [0, 0],
+		mapWheelScale: 1,
 	};
 
 	canvas = null;
 	canvasContext = null;
 	images = {};
 
-	mapMouseDownPos = null;
-
 	mapScale = 1;
 	mapPosition = [0, 0];
+
+	mapMouseDownPos = null;
+	mapWheelTimer = null;
 
 	getblock = (x, y) => {
 		if (x % 10 === 0)
@@ -32,6 +34,16 @@ class maps extends Component {
 
 	draw = () => {
 		if (this.canvas) {
+			//处理鼠标移动
+			this.mapPosition[0] += this.state.mapMouseMove[0] / 16 / this.mapScale;
+			this.mapPosition[1] += this.state.mapMouseMove[1] / 16 / this.mapScale;
+			this.mapMouseDownPos = null;
+			this.setState({ mapMouseMove: [0, 0] });
+			//处理滚轮缩放
+			this.mapScale *= this.state.mapWheelScale;
+			this.setState({ mapWheelScale: 1 });
+			this.mapWheelTimer = null;
+
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
 			if (this.mapScale > 0.5) {
 				for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y++) {
@@ -70,19 +82,17 @@ class maps extends Component {
 	}
 	handleMouseUp = () => {
 		if (this.mapMouseDownPos) {
-			this.mapPosition[0] += this.state.mapMouseMove[0] / 16 / this.mapScale;
-			this.mapPosition[1] += this.state.mapMouseMove[1] / 16 / this.mapScale;
-			this.mapMouseDownPos = null;
-			this.setState({ mapMouseMove: [0, 0] });
 			this.draw();
 		}
 	}
 
 	handleWheel = event => {
-		let mapScaleNew = this.mapScale * 1 + event.deltaY / 100;
+		if (this.mapWheelTimer) clearTimeout(this.mapWheelTimer);	//如果已经有定时器清除掉
+		this.mapWheelTimer = setTimeout(this.draw, 200);	//滚动停止后0.2s才重新渲染
+
+		let mapScaleNew = this.mapScale * this.state.mapWheelScale * (1 + event.deltaY / 500);
 		if (mapScaleNew < 100 && mapScaleNew > 0.125) {
-			this.mapScale = mapScaleNew;
-			this.draw();
+			this.setState({ mapWheelScale: this.state.mapWheelScale * (1 + event.deltaY / 500) });
 		}
 	}
 
@@ -103,7 +113,12 @@ class maps extends Component {
 						ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
 						height={this.state.mapSize[0] * 3}
 						width={this.state.mapSize[1] * 3}
-						style={{ left: -this.state.mapSize[0] + this.state.mapMouseMove[0], top: -this.state.mapSize[1] + this.state.mapMouseMove[1] }}
+						style={{
+							left: this.state.mapMouseMove[0] - this.state.mapSize[0] + (this.state.mapSize[0] * 3 - this.state.mapSize[0] * 3 * this.state.mapWheelScale) / 2,
+							top: this.state.mapMouseMove[1] - this.state.mapSize[1] + (this.state.mapSize[1] * 3 - this.state.mapSize[1] * 3 * this.state.mapWheelScale) / 2,
+							width: this.state.mapSize[0] * 3 * this.state.mapWheelScale,
+							height: this.state.mapSize[1] * 3 * this.state.mapWheelScale,
+						}}
 					></canvas>
 				</div>
 			</div >
