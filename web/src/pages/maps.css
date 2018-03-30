@@ -10,4 +10,5 @@
 
 .canvas {
 	position: absolute;
+	image-rendering: pixelated;
 }

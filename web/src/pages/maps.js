@@ -23,13 +23,17 @@ class maps extends Component {
 	mapMouseDownPos = null;
 	mapWheelTimer = null;
 
-	getblock = (x, y) => {
+	getBlock = (x, y) => {
 		if (x % 10 === 0)
 			return this.images.diamond_ore;
 		else if (y % 10 === 0)
 			return this.images.emerald_ore;
 		else
 			return this.images.stone;
+	}
+
+	getChunk = (x, y, s) => {
+
 	}
 
 	draw = () => {
@@ -48,7 +52,7 @@ class maps extends Component {
 			if (this.mapScale > 0.5) {
 				for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y++) {
 					this.canvasContext.drawImage(
-						this.getblock(x, y),
+						this.getBlock(x, y),
 						0, 0, 16, 16,
 						this.canvas.width / 2 + (x - 0.5 + this.mapPosition[0]) * 16 * this.mapScale,
 						this.canvas.height / 2 + (y - 0.5 + this.mapPosition[1]) * 16 * this.mapScale,
@@ -110,7 +114,13 @@ class maps extends Component {
 				>
 					<canvas
 						className="canvas"
-						ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
+						ref={canvas => {
+							this.canvas = canvas;
+							if (canvas) {
+								this.canvasContext = canvas.getContext("2d");
+								this.canvasContext.imageSmoothingEnabled = false;
+							}
+						}}
 						height={this.state.mapSize[0] * 3}
 						width={this.state.mapSize[1] * 3}
 						style={{
