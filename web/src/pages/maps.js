@@ -7,6 +7,10 @@ import stone from './maps/stone.png'
 import './maps.css';
 
 class maps extends Component {
+	state = {
+		mapSize: [1000, 1000],
+	};
+
 	canvas = null;
 	canvasContext = null;
 	images = {};
@@ -14,8 +18,7 @@ class maps extends Component {
 	canvasMouseDownPos = null;
 
 	mapScale = 1;
-	mapPositionX = 0;
-	mapPositionY = 0;
+	mapPosition = [0, 0];
 
 	getblock = (x, y) => {
 		if (x % 10 === 0)
@@ -29,12 +32,12 @@ class maps extends Component {
 	draw = () => {
 		if (this.canvas) {
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
-			for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPositionX); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPositionX); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPositionY); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPositionY); y++) {
+			for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y++) {
 				this.canvasContext.drawImage(
 					this.getblock(x, y),
 					0, 0, 16, 16,
-					this.canvas.width / 2 + (x - 0.5 + this.mapPositionX) * 16 * this.mapScale,
-					this.canvas.height / 2 + (y - 0.5 + this.mapPositionY) * 16 * this.mapScale,
+					this.canvas.width / 2 + (x - 0.5 + this.mapPosition[0]) * 16 * this.mapScale,
+					this.canvas.height / 2 + (y - 0.5 + this.mapPosition[1]) * 16 * this.mapScale,
 					16 * this.mapScale,
 					16 * this.mapScale);
 			}
@@ -67,11 +70,11 @@ class maps extends Component {
 				<canvas
 					className="canvas"
 					ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
-					onMouseDown={event => { this.canvasMouseDownPos = [this.mapPositionX - event.clientX / 16 / this.mapScale, this.mapPositionY - event.clientY / 16 / this.mapScale] }}
-					onMouseMove={event => { if (this.canvasMouseDownPos) { this.mapPositionX = this.canvasMouseDownPos[0] + event.clientX / 16 / this.mapScale; this.mapPositionY = this.canvasMouseDownPos[1] + event.clientY / 16 / this.mapScale; this.draw(); } }}
-					onMouseUp={event => { this.canvasMouseDownPos = null }}
-					height="1000px"
-					width="1000px"
+					onMouseDown={event => { event.preventDefault(); this.canvasMouseDownPos = [this.mapPosition[0] - event.clientX / 16 / this.mapScale, this.mapPosition[1] - event.clientY / 16 / this.mapScale] }}
+					onMouseMove={event => { if (this.canvasMouseDownPos) { event.preventDefault(); this.mapPosition[0] = this.canvasMouseDownPos[0] + event.clientX / 16 / this.mapScale; this.mapPosition[1] = this.canvasMouseDownPos[1] + event.clientY / 16 / this.mapScale; this.draw(); } }}
+					onMouseUp={event => { event.preventDefault(); this.canvasMouseDownPos = null }}
+					height={this.state.mapSize[0]}
+					width={this.state.mapSize[1]}
 				></canvas>
 			</div >
 		);
