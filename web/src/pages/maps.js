@@ -62,6 +62,28 @@ class maps extends Component {
 		(this.images.stone = new Image()).src = stone;
 	}
 
+	handleMouseDown = event => {
+		event.preventDefault();
+		this.canvasMouseDownPos = [event.clientX, event.clientY];
+	}
+	handleMouseMove = event => {
+		if (this.canvasMouseDownPos) {
+			event.preventDefault();
+			this.setState({
+				mapMouseMove: [
+					event.clientX - this.canvasMouseDownPos[0],
+					event.clientY - this.canvasMouseDownPos[1]
+				]
+			});
+		}
+	}
+	handleMouseUp = () => {
+		if (this.canvasMouseDownPos) {
+			this.mapPosition[0] += this.state.mapMouseMove[0] / 16 / this.mapScale;
+			this.mapPosition[1] += this.state.mapMouseMove[1] / 16 / this.mapScale; this.canvasMouseDownPos = null; this.draw();
+		}
+	}
+
 	render() {
 		return (
 			<div>
@@ -70,28 +92,11 @@ class maps extends Component {
 				<button onClick={this.zoomOut}>-</button>
 				<br />
 				<div className="map" style={{ height: this.state.mapSize[0], width: this.state.mapSize[1] }}
-						onMouseDown={event => {
-							event.preventDefault();
-							this.canvasMouseDownPos = [event.clientX, event.clientY];
-						}}
-						onMouseMove={event => {
-							if (this.canvasMouseDownPos) {
-								event.preventDefault();
-								this.setState({
-									mapMouseMove: [
-										event.clientX - this.canvasMouseDownPos[0],
-										event.clientY - this.canvasMouseDownPos[1]
-									]
-								});
-							}
-						}}
-						onMouseUp={event => {
-							if (this.canvasMouseDownPos) {
-								event.preventDefault();
-								this.mapPosition[0] += this.state.mapMouseMove[0] / 16 / this.mapScale;
-								this.mapPosition[1] += this.state.mapMouseMove[1] / 16 / this.mapScale; this.canvasMouseDownPos = null; this.draw();
-							}
-						}}>
+					onMouseDown={this.handleMouseDown}
+					onMouseMove={this.handleMouseMove}
+					onMouseUp={this.handleMouseUp}
+					onMouseOut={this.handleMouseUp}
+				>
 					<canvas
 						className="canvas"
 						ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
