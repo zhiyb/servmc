@@ -1,6 +1,13 @@
-.canvas {
+.map {
+	position: absolute;
 	
 	border-style: solid;
 	border-width: 2px;
 	border-color: #66ccff;
+
+	overflow:hidden;
+}
+
+.canvas {
+	position: absolute;
 }

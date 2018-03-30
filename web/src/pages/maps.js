@@ -9,6 +9,7 @@ import './maps.css';
 class maps extends Component {
 	state = {
 		mapSize: [1000, 1000],
+		mapMouseMove: [0, 0],
 	};
 
 	canvas = null;
@@ -32,6 +33,7 @@ class maps extends Component {
 	draw = () => {
 		if (this.canvas) {
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
+			this.setState({ mapMouseMove: [0, 0] });
 			for (let x = Math.round(- this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x <= Math.round(this.canvas.width / 2 / 16 / this.mapScale - this.mapPosition[0]); x++)for (let y = Math.round(- this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y <= Math.round(this.canvas.height / 2 / 16 / this.mapScale - this.mapPosition[1]); y++) {
 				this.canvasContext.drawImage(
 					this.getblock(x, y),
@@ -67,15 +69,37 @@ class maps extends Component {
 				<button onClick={this.zoomIn}>+</button>
 				<button onClick={this.zoomOut}>-</button>
 				<br />
-				<canvas
-					className="canvas"
-					ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
-					onMouseDown={event => { event.preventDefault(); this.canvasMouseDownPos = [this.mapPosition[0] - event.clientX / 16 / this.mapScale, this.mapPosition[1] - event.clientY / 16 / this.mapScale] }}
-					onMouseMove={event => { if (this.canvasMouseDownPos) { event.preventDefault(); this.mapPosition[0] = this.canvasMouseDownPos[0] + event.clientX / 16 / this.mapScale; this.mapPosition[1] = this.canvasMouseDownPos[1] + event.clientY / 16 / this.mapScale; this.draw(); } }}
-					onMouseUp={event => { event.preventDefault(); this.canvasMouseDownPos = null }}
-					height={this.state.mapSize[0]}
-					width={this.state.mapSize[1]}
-				></canvas>
+				<div className="map" style={{ height: this.state.mapSize[0], width: this.state.mapSize[1] }}>
+					<canvas
+						className="canvas"
+						ref={canvas => { this.canvas = canvas; this.canvasContext = canvas ? canvas.getContext("2d") : null; }}
+						onMouseDown={event => {
+							event.preventDefault();
+							this.canvasMouseDownPos = [event.clientX, event.clientY];
+						}}
+						onMouseMove={event => {
+							if (this.canvasMouseDownPos) {
+								event.preventDefault();
+								this.setState({
+									mapMouseMove: [
+										event.clientX - this.canvasMouseDownPos[0],
+										event.clientY - this.canvasMouseDownPos[1]
+									]
+								});
+							}
+						}}
+						onMouseUp={event => {
+							if (this.canvasMouseDownPos) {
+								event.preventDefault();
+								this.mapPosition[0] += (event.clientX - this.canvasMouseDownPos[0]) / 16 / this.mapScale;
+								this.mapPosition[1] += (event.clientY - this.canvasMouseDownPos[1]) / 16 / this.mapScale; this.canvasMouseDownPos = null; this.draw();
+							}
+						}}
+						height={this.state.mapSize[0] * 3}
+						width={this.state.mapSize[1] * 3}
+						style={{ left: -this.state.mapSize[0] + this.state.mapMouseMove[0], top: -this.state.mapSize[1] + this.state.mapMouseMove[1] }}
+					></canvas>
+				</div>
 			</div >
 		);
 	}
