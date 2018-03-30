@@ -3,6 +3,10 @@ import React, { Component } from 'react';
 import diamond_ore from './maps/diamond_ore.png'
 import emerald_ore from './maps/emerald_ore.png'
 import stone from './maps/stone.png'
+import cobblestone from './maps/cobblestone.png'
+import dirt from './maps/dirt.png'
+import cobblestone_mossy from './maps/cobblestone_mossy.png'
+import grass_path_top from './maps/grass_path_top.png'
 
 import './maps.css';
 
@@ -24,16 +28,21 @@ class maps extends Component {
 	mapWheelTimer = null;
 
 	getBlock = (x, y) => {
-		if (x % 16 === 0)
-			return this.images.diamond_ore;
-		else if (y % 16 === 0)
-			return this.images.emerald_ore;
+		if (Math.abs(Math.floor(x / 16) % 2) - Math.abs(Math.floor(y / 16) % 2) === 0)
+			if (Math.abs(x % 2) - Math.abs(y % 2) === 0)
+				return this.images.cobblestone;
+			else
+				return this.images.dirt;
 		else
-			return this.images.stone;
+			if (Math.abs(x % 2) - Math.abs(y % 2) === 0)
+				return this.images.cobblestone_mossy;
+			else
+				return this.images.grass_path_top;
+
 	}
 
 	getChunk = (x, y, s) => {
-		
+
 	}
 
 	draw = () => {
@@ -67,6 +76,10 @@ class maps extends Component {
 		(this.images.diamond_ore = new Image()).src = diamond_ore;
 		(this.images.emerald_ore = new Image()).src = emerald_ore;
 		(this.images.stone = new Image()).src = stone;
+		(this.images.cobblestone = new Image()).src = cobblestone;
+		(this.images.dirt = new Image()).src = dirt;
+		(this.images.cobblestone_mossy = new Image()).src = cobblestone_mossy;
+		(this.images.grass_path_top = new Image()).src = grass_path_top;
 	}
 
 	handleMouseDown = event => {
