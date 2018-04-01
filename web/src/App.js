@@ -94,7 +94,14 @@ const styles = theme => ({
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    padding: theme.spacing.unit * 3,
+    // padding: theme.spacing.unit * 3,
+
+    display: 'flex',
+    'flex-direction': 'column',
+    'justify-content': 'center',
+  },
+  body: {
+    flexGrow: 1,
   },
 });
 
@@ -243,7 +250,9 @@ class App extends Component {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          {this.state.page.body}
+          <div className={classes.body}>
+            {this.state.page.body}
+          </div>
         </main>
       </div>
     );

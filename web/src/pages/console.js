@@ -8,6 +8,11 @@ import Paper from 'material-ui/Paper';
 import './console.css';
 
 const styles = theme => ({
+	root: {
+		flexGrow: 1,
+		padding: theme.spacing.unit * 3,
+		overflow: 'auto',
+	},
 	button: {
 		margin: theme.spacing.unit,
 	},
@@ -108,7 +113,7 @@ class console extends Component {
 		const { classes } = this.props;
 
 		return (
-			<div id="console">
+			<div className={classes.root}>
 				<Paper className={classes.pager} elevation={4}>
 					<div className="msgsScroll" ref={msgsScroll => { this.msgsScroll = msgsScroll; }}>
 						<div className="msgs" ref={msgs => { this.msgs = msgs; }}></div>
