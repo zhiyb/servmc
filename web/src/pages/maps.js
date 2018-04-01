@@ -29,6 +29,8 @@ class maps extends Component {
 
 	mapMouseDownPos = null;
 	mapWheelTimer = null;
+	mapTouchStartPos = null;
+	mapTouchStartLength = null;
 
 	getBlock = (x, y) => {
 		if (Math.abs(Math.floor(x / 16) % 2) - Math.abs(Math.floor(y / 16) % 2) === 0)
@@ -177,22 +179,36 @@ class maps extends Component {
 	}
 
 	handleTouchStart = event => {
-        event.preventDefault();
-		this.mapMouseDownPos = [event.targetTouches[0].pageX, event.targetTouches[0].pageY];
+		if (event.targetTouches.length === 1) {
+			event.preventDefault();
+			this.mapTouchStartPos = [event.targetTouches[0].pageX, event.targetTouches[0].pageY];
+		}
+		else if (event.targetTouches.length === 2) {
+			event.preventDefault();
+			this.mapTouchStartLength = Math.sqrt(Math.pow(event.targetTouches[0].pageX - event.targetTouches[1].pageX, 2) + Math.pow(event.targetTouches[0].pageY - event.targetTouches[1].pageY, 2));
+		}
 	}
 	handleTouchMove = event => {
-        event.preventDefault();
-		if (this.mapMouseDownPos) {
+		if (event.targetTouches.length === 1) {
+			event.preventDefault();
+			if (this.mapTouchStartPos) {
+				this.setState({
+					mapMouseMove: [
+						event.targetTouches[0].pageX - this.mapTouchStartPos[0],
+						event.targetTouches[0].pageY - this.mapTouchStartPos[1]
+					]
+				});
+			}
+		}
+		else if (event.targetTouches.length === 2) {
+			event.preventDefault();
 			this.setState({
-				mapMouseMove: [
-					event.targetTouches[0].pageX - this.mapMouseDownPos[0],
-					event.targetTouches[0].pageY - this.mapMouseDownPos[1]
-				]
+				mapWheelScale: Math.sqrt(Math.pow(event.targetTouches[0].pageX - event.targetTouches[1].pageX, 2) + Math.pow(event.targetTouches[0].pageY - event.targetTouches[1].pageY, 2)) / this.mapTouchStartLength
 			});
 		}
 	}
 	handleTouchEnd = () => {
-		if (this.mapMouseDownPos) {
+		if (this.mapTouchStartPos) {
 			this.draw();
 		}
 	}
