@@ -16,8 +16,8 @@ import './maps.css';
 class maps extends Component {
 	state = {
 		mapSize: [1000, 1000],
-		mapMouseMove: [0, 0],
-		mapWheelScale: 1,
+		mapMove: [0, 0],
+		mapZoom: 1,
 	};
 
 	canvas = null;
@@ -61,13 +61,13 @@ class maps extends Component {
 	draw = () => {
 		if (this.canvas) {
 			//处理鼠标移动
-			this.mapPosition[0] += this.state.mapMouseMove[0] / 16 / this.mapScale;
-			this.mapPosition[1] += this.state.mapMouseMove[1] / 16 / this.mapScale;
+			this.mapPosition[0] += this.state.mapMove[0] / 16 / this.mapScale;
+			this.mapPosition[1] += this.state.mapMove[1] / 16 / this.mapScale;
 			this.mapMouseDownPos = null;
-			this.setState({ mapMouseMove: [0, 0] });
+			this.setState({ mapMove: [0, 0] });
 			//处理滚轮缩放
-			this.mapScale *= this.state.mapWheelScale;
-			this.setState({ mapWheelScale: 1 });
+			this.mapScale *= this.state.mapZoom;
+			this.setState({ mapZoom: 1 });
 			this.mapWheelTimer = null;
 
 			this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -155,7 +155,7 @@ class maps extends Component {
 		if (this.mapMouseDownPos) {
 			event.preventDefault();
 			this.setState({
-				mapMouseMove: [
+				mapMove: [
 					event.clientX - this.mapMouseDownPos[0],
 					event.clientY - this.mapMouseDownPos[1]
 				]
@@ -172,9 +172,9 @@ class maps extends Component {
 		if (this.mapWheelTimer) clearTimeout(this.mapWheelTimer);	//如果已经有定时器清除掉
 		this.mapWheelTimer = setTimeout(this.draw, 200);	//滚动停止后0.2s才重新渲染
 
-		let mapScaleNew = this.mapScale * this.state.mapWheelScale * (1 + event.deltaY / 500);
+		let mapScaleNew = this.mapScale * this.state.mapZoom * (1 + event.deltaY / 500);
 		if (mapScaleNew < 100 && mapScaleNew > 1/16/16) {
-			this.setState({ mapWheelScale: this.state.mapWheelScale * (1 + event.deltaY / 500) });
+			this.setState({ mapZoom: this.state.mapZoom * (1 + event.deltaY / 500) });
 		}
 	}
 
@@ -193,7 +193,7 @@ class maps extends Component {
 			event.preventDefault();
 			if (this.mapTouchStartPos) {
 				this.setState({
-					mapMouseMove: [
+					mapMove: [
 						event.targetTouches[0].pageX - this.mapTouchStartPos[0],
 						event.targetTouches[0].pageY - this.mapTouchStartPos[1]
 					]
@@ -203,7 +203,7 @@ class maps extends Component {
 		else if (event.targetTouches.length === 2) {
 			event.preventDefault();
 			this.setState({
-				mapWheelScale: Math.sqrt(Math.pow(event.targetTouches[0].pageX - event.targetTouches[1].pageX, 2) + Math.pow(event.targetTouches[0].pageY - event.targetTouches[1].pageY, 2)) / this.mapTouchStartLength
+				mapZoom: Math.sqrt(Math.pow(event.targetTouches[0].pageX - event.targetTouches[1].pageX, 2) + Math.pow(event.targetTouches[0].pageY - event.targetTouches[1].pageY, 2)) / this.mapTouchStartLength
 			});
 		}
 	}
@@ -261,10 +261,10 @@ class maps extends Component {
 						height={this.state.mapSize[0] * 3}
 						width={this.state.mapSize[1] * 3}
 						style={{
-							left: this.state.mapMouseMove[0] - this.state.mapSize[0] + (this.state.mapSize[0] * 3 - this.state.mapSize[0] * 3 * this.state.mapWheelScale) / 2,
-							top: this.state.mapMouseMove[1] - this.state.mapSize[1] + (this.state.mapSize[1] * 3 - this.state.mapSize[1] * 3 * this.state.mapWheelScale) / 2,
-							width: this.state.mapSize[0] * 3 * this.state.mapWheelScale,
-							height: this.state.mapSize[1] * 3 * this.state.mapWheelScale,
+							left: this.state.mapMove[0] - this.state.mapSize[0] + (this.state.mapSize[0] * 3 - this.state.mapSize[0] * 3 * this.state.mapZoom) / 2,
+							top: this.state.mapMove[1] - this.state.mapSize[1] + (this.state.mapSize[1] * 3 - this.state.mapSize[1] * 3 * this.state.mapZoom) / 2,
+							width: this.state.mapSize[0] * 3 * this.state.mapZoom,
+							height: this.state.mapSize[1] * 3 * this.state.mapZoom,
 						}}
 					></canvas>
 				</div>
