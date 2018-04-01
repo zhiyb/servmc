@@ -176,6 +176,35 @@ class maps extends Component {
 		}
 	}
 
+	handleTouchStart = event => {
+        event.preventDefault();
+		this.mapMouseDownPos = [event.targetTouches[0].pageX, event.targetTouches[0].pageY];
+	}
+	handleTouchMove = event => {
+        event.preventDefault();
+		if (this.mapMouseDownPos) {
+			this.setState({
+				mapMouseMove: [
+					event.targetTouches[0].pageX - this.mapMouseDownPos[0],
+					event.targetTouches[0].pageY - this.mapMouseDownPos[1]
+				]
+			});
+		}
+	}
+	handleTouchEnd = () => {
+		if (this.mapMouseDownPos) {
+			this.draw();
+		}
+	}
+
+	componentWillUnmount() {
+		if(this.map){
+			this.map.removeEventListener("touchstart", this.handleTouchStart);
+			this.map.removeEventListener("touchmove", this.handleTouchStart);
+			this.map.removeEventListener("touchend", this.handleTouchStart);
+		}
+	}
+
 	render() {
 		return (
 			<div>
@@ -186,7 +215,23 @@ class maps extends Component {
 					onMouseMove={this.handleMouseMove}
 					onMouseUp={this.handleMouseUp}
 					onMouseOut={this.handleMouseUp}
-					onWheel={this.handleWheel}
+					onWheel={this.handleWheel}	//滚轮
+					// onTouchStart={this.handleTouchStart}
+					// onTouchMove={this.handleTouchMove}
+					// onTouchEnd={this.handleTouchEnd}
+					ref={map => {
+						if(this.map){
+							this.map.removeEventListener("touchstart", this.handleTouchStart);
+							this.map.removeEventListener("touchmove", this.handleTouchStart);
+							this.map.removeEventListener("touchend", this.handleTouchStart);
+						}
+						if (map) {
+							map.addEventListener("touchstart", this.handleTouchStart, false);	//onTouchStart会导致preventDefault报错 只能这样
+							map.addEventListener("touchmove", this.handleTouchMove, false);
+							map.addEventListener("touchend", this.handleTouchEnd, false);
+						}
+						this.map = map;
+					}}
 				>
 					<canvas
 						className="canvas"
