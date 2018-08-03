@@ -161,10 +161,13 @@ EnhancedTableToolbar.propTypes = {
 
 EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar);
 
+//======================================
+
 const styles = theme => ({
 	root: {
-		width: '100%',
-		marginTop: theme.spacing.unit * 3,
+		flexGrow: 1,
+		padding: theme.spacing.unit * 3,
+		overflow: 'auto',
 	},
 	table: {
 		minWidth: 800,
@@ -174,7 +177,6 @@ const styles = theme => ({
 	},
 });
 
-//======================================
 
 class backup extends Component {
 	constructor(props, context) {
@@ -261,7 +263,8 @@ class backup extends Component {
 		const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
 		return (
-			<Paper className={classes.root}>
+			<div className={classes.root}>
+			<Paper>
 				<EnhancedTableToolbar numSelected={selected.length} />
 				<div className={classes.tableWrapper}>
 					<Table className={classes.table}>
@@ -326,6 +329,7 @@ class backup extends Component {
 					</Table>
 				</div>
 			</Paper>
+			</div>
 		);
 	}
 	static propTypes = {

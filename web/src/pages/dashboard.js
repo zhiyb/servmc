@@ -12,6 +12,8 @@ import query from '../query';
 const styles = theme => ({
 	root: {
 		flexGrow: 1,
+		padding: theme.spacing.unit * 3,
+		overflow: 'auto',
 	},
 	paper: {
 		padding: theme.spacing.unit * 2,
@@ -69,7 +71,7 @@ class dashboard extends Component {
 	}
 
 	componentWillUnmount() {
-		this.updateTimer && clearTimeout(this.updateTimer)
+		this.updateTimer && clearTimeout(this.updateTimer);
 	}
 
 	render() {
