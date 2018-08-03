@@ -254,13 +254,14 @@ static struct json_object *system_json(struct json_object *act)
 	struct json_object *swap = NULL;
 
 	pthread_mutex_lock(&data.lock);
-	struct stat_cpu_t *cpp = data.prev->cpu;
+	struct stat_cpu_t *cpp;
 	struct stat_cpu_t *cnp = data.now->cpu;
 	struct stat_mem_t *mp = &data.now->mem;
 
 	// CPU information may not be available during startup
 	if (!data.prev)
 		goto mem;
+	cpp = data.prev->cpu;
 
 	// CPU array
 	while (cpp && cnp) {

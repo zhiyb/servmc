@@ -130,6 +130,12 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		// Process POST data
 		psd->rp = action_json_doc(psd->p, LWS_PRE);
 		psd->rlen = strlen(psd->rp + LWS_PRE);
+		cmd_printf(CLR_WEB, "%s: HTTP POST reply: %s\n",
+				__func__, psd->rp + LWS_PRE);
+		// Reset input buffer
+		free(psd->p);
+		psd->p = NULL;
+		psd->len = 0;
 		// Write response header
 		unsigned char *hdr = malloc(LWS_PRE + 1024);
 		unsigned char *start = hdr + LWS_PRE, *end = start + 1024;
@@ -147,11 +153,15 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		free(hdr);
 		lws_callback_on_writable(wsi);
 	} else if (reason == LWS_CALLBACK_HTTP_WRITEABLE) {
-		if (!psd->len)
+		if (!psd->rlen)
 			return -1;
 		if (lws_write(wsi, (unsigned char *)psd->rp + LWS_PRE,
 			      psd->rlen, LWS_WRITE_HTTP) < 0)
 			return -1;
+		// Reset response buffer
+		free(psd->rp);
+		psd->rp = NULL;
+		psd->rlen = 0;
 		if (lws_http_transaction_completed(wsi))
 			return -1;
 	} else if (reason == LWS_CALLBACK_CLOSED_HTTP) {

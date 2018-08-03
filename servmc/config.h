@@ -66,3 +66,4 @@
 #define CLR_EXTERNAL	"\33[33m"
 #define CLR_LIBWS	"\33[34m"
 #define CLR_WEB		"\33[94m"
+#define CLR_DEBUG	"\33[4;37m"
