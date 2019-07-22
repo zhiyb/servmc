@@ -2,3 +2,5 @@ servmc
 *.o
 *.d
 *.mgc
+*.hd
+*.out

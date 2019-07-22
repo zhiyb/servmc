@@ -1,23 +1,26 @@
 OBJS	:= main.o exec.o cmd.o net.o update.o monitor.o web.o action.o
 OBJS	+= $(subst .c,.o,$(wildcard mon/*.c))
-TRG		= servmc
+
+TRG	= servmc
+PKGS	= json-c libwebsockets zlib
 
 override	CFLAGS	+= -Wall -Werror -O2 -g \
 			   -Wno-error=unused-function \
 			   -Wno-error=unused-variable
 override	CFLAGS	+= $(shell curl-config --cflags)
-override	CFLAGS	+= $(shell pkg-config --cflags json-c)
-override	CFLAGS	+= $(shell pkg-config --cflags libwebsockets)
+override	CFLAGS	+= $(shell pkg-config --cflags $(PKGS))
 override	LDFLAGS	+= -Wall -Werror -O2 -g
 override	LIBS	+= $(shell curl-config --libs)
-override	LIBS	+= $(shell pkg-config --libs json-c)
-override	LIBS	+= $(shell pkg-config --libs libwebsockets)
+override	LIBS	+= $(shell pkg-config --libs $(PKGS))
 override	LIBS	+= -lreadline -lmagic -lpthread
 
 .PHONY: all
-all: $(TRG)
+all: $(TRG) region
 
 $(TRG): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+region: region.o nbt.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 .c.o:

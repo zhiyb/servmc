@@ -158,7 +158,7 @@ static int web_http(struct lws *wsi, enum lws_callback_reasons reason,
 		if (lws_write(wsi, (unsigned char *)psd->rp + LWS_PRE,
 			      psd->rlen, LWS_WRITE_HTTP) < 0)
 			return -1;
-		// Reset response buffer
+		// Reset reply buffer
 		free(psd->rp);
 		psd->rp = NULL;
 		psd->rlen = 0;

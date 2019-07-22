@@ -20,7 +20,7 @@ This is a helper program. By encapsulating the server application for the Java v
 ```
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
-sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev libwebsockets-dev libreadline-dev libmagic-dev
+sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev libwebsockets-dev libreadline-dev libmagic-dev zlib1g-dev
 ```
 
 ## MacOS
